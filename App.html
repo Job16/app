@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard App</title>
+  <!-- Font Awesome voor iconen -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #e9ecef;
+    }
+    .ipad-container {
+      width: 1024px;
+      height: 768px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px #0002;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    @media (max-width: 1100px) {
+      .ipad-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        margin: 0;
+      }
+    }
+    .app-container {
+      max-width: 100%;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      box-shadow: none;
+      margin: 0;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 0;
+    }
+    .main-content {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 16px 8px 16px;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header .menu {
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .header .title {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .header .right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header .notif {
+      position: relative;
+      font-size: 1.3em;
+      cursor: pointer;
+    }
+    .header .notif .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 0.7em;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-weight: bold;
+    }
+    .header .profile {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #eee;
+    }
+    .section-title {
+      margin: 22px 0 8px 16px;
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #444;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 0 16px;
+      margin-bottom: 10px;
+    }
+    .tile {
+      flex: 1 1 45%;
+      min-width: 140px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 18px 10px 14px 10px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      position: relative;
+    }
+    .tile:hover {
+      box-shadow: 0 4px 16px #0002;
+    }
+    .tile .icon {
+      font-size: 1.7em;
+      margin-bottom: 8px;
+    }
+    .tile .badge {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: #27ae60;
+      color: #fff;
+      font-size: 0.9em;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-weight: bold;
+    }
+    .tile .warning {
+      color: #e67e22;
+    }
+    .tile .danger {
+      color: #e74c3c;
+    }
+    .tile .success {
+      color: #27ae60;
+    }
+    .tile .info {
+      color: #2980b9;
+    }
+    .tile-title {
+      font-size: 1em;
+      font-weight: 500;
+      color: #333;
+    }
+    /* Onderste navigatiebalk */
+    .bottom-nav {
+      flex-shrink: 0;
+      position: relative;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: none;
+      background: #fff;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 60px;
+      z-index: 20;
+      box-shadow: 0 -2px 8px #0001;
+    }
+    .bottom-nav .nav-item {
+      flex: 1;
+      text-align: center;
+      color: #888;
+      font-size: 1.2em;
+      padding: 8px 0 0 0;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .bottom-nav .nav-item.active {
+      color: #27ae60;
+    }
+    .bottom-nav .nav-item .nav-label {
+      display: block;
+      font-size: 0.8em;
+      margin-top: 2px;
+    }
+    @media (max-width: 1100px) {
+      .bottom-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 100vw;
+        max-width: 100vw;
+      }
+    }
+    .hidden { display: none; }
+    .verzoek-formulier {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px #0001;
+      padding: 32px 24px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .verzoek-formulier h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+      margin-bottom: 8px;
+    }
+    .verzoek-formulier label {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .verzoek-formulier input[type="text"],
+    .verzoek-formulier textarea,
+    .verzoek-formulier select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      margin-bottom: 8px;
+      background: #f7f8fa;
+    }
+    .verzoek-formulier textarea {
+      resize: vertical;
+    }
+    .verzoek-formulier input[type="file"] {
+      margin-bottom: 8px;
+    }
+    .verzoek-formulier button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      margin-right: 8px;
+      cursor: pointer;
+      background: #27ae60;
+      color: #fff;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .verzoek-formulier button[type="button"] {
+      background: #eee;
+      color: #333;
+    }
+    .verzoek-formulier .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .verzoek-formulier .form-row > * {
+      flex: 1;
+    }
+    .verzoek-bevestiging {
+      text-align: center;
+      padding: 40px 0;
+      font-size: 1.2em;
+      color: #27ae60;
+    }
+    /* Style popup voor mobielvriendelijkheid en ruimte */
+    .taak-popup-label {
+      font-weight: bold;
+      margin-right: 8px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 1.05em;
+    }
+    .taak-popup-icoon {
+      margin-right: 7px;
+      font-size: 1.15em;
+      width: 1.3em;
+      display: inline-block;
+      text-align: center;
+      color: #27ae60;
+    }
+    .taak-popup-veld {
+      margin-bottom: 13px;
+      word-break: break-word;
+    }
+    .taak-popup-omschrijving {
+      color: #444;
+      font-size: 1.08em;
+      margin-bottom: 18px;
+      margin-top: 0;
+      font-weight: 400;
+    }
+    .taak-popup-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .taak-popup-fieldbox {
+      background: #f7f8fa;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 16px 18px 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 1.08em;
+      min-height: 44px;
+      transition: box-shadow 0.2s;
+    }
+    .taak-popup-fieldbox .taak-popup-icoon {
+      font-size: 1.45em;
+      margin-top: 2px;
+      color: #27ae60;
+      min-width: 1.7em;
+    }
+    .taak-popup-fieldcontent {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .taak-popup-label {
+      font-weight: bold;
+      font-size: 1.04em;
+      margin-bottom: 2px;
+      color: #222;
+    }
+    .taak-popup-omschrijving {
+      color: #444;
+      font-size: 1.08em;
+      margin-bottom: 18px;
+      margin-top: 0;
+      font-weight: 400;
+    }
+    @media (max-width: 700px) {
+      .taak-popup-fieldbox {
+        padding: 12px 8px 10px 10px;
+        font-size: 0.98em;
+      }
+      .taak-popup-fields {
+        gap: 10px;
+      }
+    }
+    .taak-popup-action-btn {
+      box-shadow: 0 2px 8px #27ae6022;
+      transition: background 0.2s, box-shadow 0.2s;
+      border-radius: 12px;
+      min-height: 54px;
+      margin-bottom: 0;
+      outline: none;
+      user-select: none;
+      padding: 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .taak-popup-action-btn:active {
+      background: #219150;
+      box-shadow: 0 1px 4px #27ae6022;
+    }
+    .taak-popup-action-btn-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 28px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+    }
+    .taak-popup-action-btn {
+      width: 100%;
+      max-width: 100%;
+      box-shadow: 0 2px 8px #27ae6022;
+      transition: background 0.2s, box-shadow 0.2s;
+      border-radius: 12px;
+      min-height: 54px;
+      outline: none;
+      user-select: none;
+      padding: 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 1.13em;
+      font-weight: 600;
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      gap: 12px;
+    }
+    .taak-popup-action-btn:active {
+      background: #219150;
+      box-shadow: 0 1px 4px #27ae6022;
+    }
+    @media (max-width: 700px) {
+      .taak-popup-action-btn-wrap {
+        margin-top: 18px;
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+      }
+      .taak-popup-action-btn {
+        min-height: 48px;
+        font-size: 1em;
+      }
+    }
+    /* Extra styles voor cards, badges en filters in chef CTQ-planning */
+    .ctq-card-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
+    .ctq-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 12px 12px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: box-shadow 0.2s;
+      font-size: 0.97em;
+    }
+    .ctq-card:hover { box-shadow: 0 4px 18px #0002; }
+    .ctq-card-header { display: flex; align-items: center; gap: 8px; font-size: 0.98em; }
+    .ctq-card-title { font-size: 1em; font-weight: 600; color: #222; flex: 1; }
+    .ctq-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 7px;
+      font-size: 0.93em;
+      font-weight: 600;
+      margin-left: 3px;
+      vertical-align: middle;
+    }
+    .ctq-badge.status-niet { background: #eee; color: #333; }
+    .ctq-badge.status-toegewezen { background: #27ae60; color: #fff; }
+    .ctq-badge.status-afgerond { background: #2980b9; color: #fff; }
+    .ctq-badge.prio-hoog { background: #e74c3c; color: #fff; }
+    .ctq-badge.prio-normaal { background: #2980b9; color: #fff; }
+    .ctq-badge.prio-laag { background: #27ae60; color: #fff; }
+    .ctq-card-row { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.96em; color: #444; }
+    .ctq-card-label { font-weight: 500; min-width: 70px; color: #222; font-size: 0.96em; }
+    .ctq-card-actions { display: flex; gap: 7px; margin-top: 4px; }
+    .ctq-btn {
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 5px 13px;
+      font-size: 0.97em;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.2s;
+    }
+    .ctq-btn:active { background: #219150; }
+    .ctq-btn.details { background: #eee; color: #333; }
+    .ctq-filterbar {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .ctq-filterbar label { font-weight: 500; }
+    .ctq-badge-count {
+      background: #e74c3c;
+      color: #fff;
+      border-radius: 50%;
+      padding: 2px 8px;
+      font-size: 0.95em;
+      font-weight: bold;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    @media (max-width: 700px) {
+      .ctq-card { padding: 12px 8px 10px 10px; }
+      .ctq-card-row { flex-direction: column; gap: 4px; }
+      .ctq-filterbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+    /* ... bestaande ctq-card styles ... */
+    .ctq-upcoming-tabs { display: flex; gap: 12px; margin-bottom: 18px; }
+    .ctq-upcoming-tab-btn {
+      padding:8px 18px; border:none; border-radius:6px; font-weight:600; cursor:pointer;
+      background: #eee; color: #333;
+      transition: background 0.2s, color 0.2s;
+    }
+    .ctq-upcoming-tab-btn.active { background: #27ae60; color: #fff; }
+    .ctq-upcoming-filterbar { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .ctq-upcoming-section-title { font-size:1.08em; font-weight:600; margin:18px 0 8px 0; }
+    .ctq-upcoming-badge-alert { background: #e67e22; color: #fff; border-radius: 8px; padding: 2px 10px; font-size: 0.97em; font-weight: 600; margin-left: 8px; }
+    .ctq-upcoming-badge-ok { background: #27ae60; color: #fff; border-radius: 8px; padding: 2px 10px; font-size: 0.97em; font-weight: 600; margin-left: 8px; }
+    @media (max-width: 700px) {
+      .ctq-upcoming-tabs { flex-direction: column; gap: 6px; }
+      .ctq-upcoming-filterbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+    #taak-modal, #chef-modal {
+      max-width: 520px;
+      width: 95%;
+      min-width: 0;
+      padding: 28px 16px 22px 16px;
+      font-size: 1em;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px #0003;
+      margin: auto;
+    }
+    #taak-modal-content, #chef-modal-content {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-bottom: 0;
+    }
+    @media (max-width: 700px) {
+      #taak-modal, #chef-modal {
+        padding: 12px 2vw 10px 2vw;
+        font-size: 0.97em;
+        max-height: 96vh;
+      }
+      #taak-modal-content, #chef-modal-content {
+        max-height: 68vh;
+      }
+    }
+    .monteur-agenda-week { width:100%; overflow-x:auto; }
+    .agenda-header, .agenda-body { display:flex; }
+    .agenda-tijd-col { width:80px; flex-shrink:0; }
+    .agenda-dag-col { flex:1 1 0; min-width:120px; border-left:1px solid #e0e6ef; position:relative; }
+    .agenda-header { background:#f7f8fa; border-bottom:1px solid #e0e6ef; }
+    .agenda-dag-label { text-align:center; font-weight:600; padding:8px 0 6px 0; color:#2980b9; font-size:1.08em; }
+    .agenda-body { min-height:780px; }
+    .agenda-tijdvak { height:60px; text-align:right; padding:0 12px; color:#888; font-size:1.08em; border-bottom:1px solid #f2f4fa; display:flex; align-items:center; }
+    .agenda-dag-body { position:relative; }
+    .agenda-cel { height:60px; border-bottom:1px solid #f2f4fa; }
+    .agenda-taak-blok { 
+      position:absolute; left:4px; right:4px; background:#eaf3fb; border-left:4px solid #2980b9; 
+      box-shadow:0 2px 8px #2980b91a; padding:7px 12px 5px 12px; font-size:0.98em; color:#222; cursor:pointer; z-index:2; overflow:hidden; transition:box-shadow 0.2s; display:flex; flex-direction:column; justify-content:center; 
+      box-sizing: border-box; border-radius: 0;
+    }
+    .agenda-taak-blok:hover { box-shadow:0 4px 16px #2980b92a; background:#d6e8fa; }
+    .agenda-taak-tijd { font-weight:600; color:#2980b9; font-size:0.97em; margin-bottom:2px; }
+    .agenda-taak-oms { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.97em; }
+    .agenda-flex-taken { margin-top:32px; }
+    @media (max-width:1100px) { .monteur-agenda-week { font-size:0.97em; } .agenda-dag-col { min-width:90px; } .agenda-tijd-col { width:60px; } }
+    @media (max-width:700px) { .monteur-agenda-week { font-size:0.93em; } .agenda-dag-col { min-width:70px; } .agenda-tijd-col { width:38px; } }
+    // CSS voor flexibele taken kaartjes
+    .flex-taken-kaarten { display:flex; flex-wrap:wrap; gap:18px; margin-top:10px; }
+    .flex-taak-kaart { background:#f7f8fa; border-radius:14px; box-shadow:0 2px 8px #2980b91a; padding:18px 18px 14px 18px; min-width:220px; max-width:340px; flex:1 1 220px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; border-left:4px solid #27ae60; }
+    .flex-taak-oms { font-weight:600; font-size:1.08em; color:#222; margin-bottom:2px; }
+    .flex-taak-deadline { color:#2980b9; font-size:0.98em; margin-bottom:4px; }
+    .flex-taak-btn { background:#27ae60; color:#fff; border:none; border-radius:8px; padding:6px 18px; font-size:1em; font-weight:600; cursor:pointer; margin-top:4px; }
+    .flex-taak-btn:hover { background:#219150; }
+    @media (max-width:900px) { .flex-taken-kaarten { flex-direction:column; gap:12px; } .flex-taak-kaart { min-width:0; max-width:100%; } }
+    const flexKaartCss = `
+    .flex-taken-kaarten { display:block; margin-top:10px; }
+    .flex-taak-kaart { background:#f7f8fa; border-radius:14px; box-shadow:0 2px 8px #2980b91a; padding:18px 18px 14px 18px; width:100%; max-width:none; margin-bottom:16px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; border-left:4px solid #27ae60; }
+    .flex-taak-oms { font-weight:600; font-size:1.08em; color:#222; margin-bottom:2px; }
+    .flex-taak-deadline { color:#2980b9; font-size:0.98em; margin-bottom:4px; }
+    .flex-taak-btn { background:#27ae60; color:#fff; border:none; border-radius:8px; padding:6px 18px; font-size:1em; font-weight:600; cursor:pointer; margin-top:4px; }
+    .flex-taak-btn:hover { background:#219150; }
+    @media (max-width:900px) { .flex-taken-kaarten { } .flex-taak-kaart { min-width:0; max-width:100%; } }
+    `;
+  </style>
+</head>
+<body>
+  <div class="ipad-container">
+    <div class="app-container">
+      <div class="main-content" id="dashboard-content">
+        <!-- Header -->
+        <div class="header">
+          <span class="menu"><i class="fas fa-bars"></i></span>
+          <span class="title">Home</span>
+          <div class="right">
+            <!-- Profielfoto en belletje verwijderd -->
+          </div>
+        </div>
+
+        <!-- Essentieel -->
+        <div class="section-title">Essentieel</div>
+        <div class="grid">
+          <div class="tile">
+            <span class="icon success"><i class="fas fa-gauge"></i></span>
+            <span class="tile-title">Dashboards</span>
+          </div>
+        </div>
+
+        <!-- Meldingen -->
+        <div class="section-title">Meldingen</div>
+        <div class="grid">
+          <div class="tile" id="open-taken-tile">
+            <span class="icon success"><i class="fas fa-tasks"></i></span>
+            <span class="tile-title">Open taken</span>
+          </div>
+          <div class="tile" id="verzoek-indienen-tile">
+            <span class="icon warning"><i class="fas fa-exclamation-triangle"></i></span>
+            <span class="tile-title">Verzoek indienen</span>
+          </div>
+          <div class="tile">
+            <span class="icon danger"><i class="fas fa-bolt"></i></span>
+            <span class="tile-title">Storingen</span>
+          </div>
+          <div class="tile">
+            <span class="icon danger"><i class="fas fa-exclamation-circle"></i></span>
+            <span class="tile-title">Storing melden</span>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="section-title">Zoeken</div>
+        <div class="grid">
+          <div class="tile">
+            <span class="icon info"><i class="fas fa-cubes"></i></span>
+            <span class="tile-title">Asset</span>
+          </div>
+          <div class="tile">
+            <span class="icon info"><i class="fas fa-gears"></i></span>
+            <span class="tile-title">Onderdeel</span>
+          </div>
+          <div class="tile">
+            <span class="icon info"><i class="fas fa-user"></i></span>
+            <span class="tile-title">Leverancier</span>
+          </div>
+          <div class="tile">
+            <span class="icon info"><i class="fas fa-file-invoice"></i></span>
+            <span class="tile-title">Inkooporder</span>
+          </div>
+        </div>
+
+        <!-- Others -->
+        <div class="section-title">Overig</div>
+        <div class="grid">
+          <div class="tile">
+            <span class="icon"><i class="fas fa-truck"></i></span>
+            <span class="tile-title">Ontvang PO Items</span>
+          </div>
+          <div class="tile">
+            <span class="icon"><i class="fas fa-qrcode"></i></span>
+            <span class="tile-title">Scan QR Code</span>
+          </div>
+          <div class="tile">
+            <span class="icon"><i class="fas fa-cube"></i></span>
+            <span class="tile-title">Asset toevoegen</span>
+          </div>
+          <div class="tile">
+            <span class="icon"><i class="fas fa-map"></i></span>
+            <span class="tile-title">Kaarten</span>
+          </div>
+        </div>
+      </div>
+      <div class="main-content hidden" id="verzoek-form-content">
+        <form class="verzoek-formulier" id="verzoekForm">
+          <h2>Verzoek indienen</h2>
+          <p>Meld hier een wens of probleem. Je verzoek wordt zo snel mogelijk opgepakt.</p>
+
+          <label for="categorie">Categorie</label>
+          <select id="categorie" name="categorie">
+            <option>Facilitair</option>
+            <option>ICT</option>
+            <option>Schoonmaak</option>
+            <option>Veiligheid</option>
+            <option>Overig</option>
+          </select>
+
+          <label for="onderwerp">Onderwerp*</label>
+          <input type="text" id="onderwerp" name="onderwerp" required>
+
+          <label for="omschrijving">Omschrijving*</label>
+          <textarea id="omschrijving" name="omschrijving" rows="4" required></textarea>
+
+          <label for="locatie">Locatie</label>
+          <input type="text" id="locatie" name="locatie">
+
+          <label for="prioriteit">Prioriteit</label>
+          <select id="prioriteit" name="prioriteit">
+            <option>Laag</option>
+            <option>Normaal</option>
+            <option>Hoog</option>
+          </select>
+
+          <label for="contact">Contactgegevens</label>
+          <input type="text" id="contact" name="contact" placeholder="Naam, e-mail of telefoon">
+
+          <label for="foto">Foto toevoegen</label>
+          <input type="file" id="foto" name="foto" accept="image/*">
+
+          <div style="display: flex; gap: 8px;">
+            <button type="submit">Verzenden</button>
+            <button type="button" id="annuleerBtn">Annuleren</button>
+          </div>
+        </form>
+        <div class="verzoek-bevestiging hidden" id="verzoekBevestiging">
+          <strong>Bedankt!</strong><br>Je verzoek is ontvangen.
+        </div>
+      </div>
+      <div class="main-content hidden" id="open-taken-content">
+        <div class="header">
+          <span class="menu" id="back-to-dashboard"><i class="fas fa-arrow-left"></i></span>
+          <span class="title">Open taken</span>
+        </div>
+        <div style="padding: 16px;">
+          <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items:center;">
+            <label for="rol-select" style="font-weight:500;">Rol:</label>
+            <select id="rol-select" style="padding:6px; border-radius:6px; border:1px solid #ccc;">
+              <option value="chef">Chef Technische Dienst</option>
+              <option value="monteur">Monteur</option>
+            </select>
+            <select id="monteur-select" style="padding:6px; border-radius:6px; border:1px solid #ccc; display:none;"></select>
+          </div>
+          <div id="chef-view" class="hidden">
+            <div class="ctq-upcoming-tabs">
+              <button id="chef-tab-ctq" class="chef-tab-btn ctq-upcoming-tab-btn active">CTQ-planning</button>
+              <button id="chef-tab-verzoeken" class="chef-tab-btn ctq-upcoming-tab-btn">Verzoeken beoordelen</button>
+              <button id="chef-tab-upcoming" class="chef-tab-btn ctq-upcoming-tab-btn">Aankomende CTQ's</button>
+            </div>
+            <div id="chef-ctq-planning-tab">
+            <div id="chef-ctq-planning" style="margin-bottom:32px;"></div>
+            </div>
+            <div id="chef-verzoeken-tab" style="display:none;">
+              <h3>Binnengekomen verzoeken</h3>
+              <div id="chef-verzoeken-overzicht"></div>
+            </div>
+            <div id="chef-upcoming-tab" style="display:none;">
+              <div id="chef-upcoming-content"></div>
+            </div>
+          </div>
+          <div id="monteur-view" class="hidden">
+            <h3 id="monteur-todo-title" style="margin-top:0;"></h3>
+            <div id="monteur-todo-list"></div>
+            <div id="monteur-taak-detail" class="hidden"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <i class="fas fa-gauge"></i>
+          <span class="nav-label">Dashboards</span>
+        </div>
+        <div class="nav-item">
+          <i class="fas fa-tasks"></i>
+          <span class="nav-label">Taken</span>
+        </div>
+        <div class="nav-item">
+          <i class="fas fa-search"></i>
+          <span class="nav-label">Zoeken</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Navigatie: dashboard <-> verzoek indienen
+    const verzoekTile = document.getElementById('verzoek-indienen-tile');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const verzoekFormContent = document.getElementById('verzoek-form-content');
+    const annuleerBtn = document.getElementById('annuleerBtn');
+    const verzoekForm = document.getElementById('verzoekForm');
+    const verzoekBevestiging = document.getElementById('verzoekBevestiging');
+
+    verzoekTile.addEventListener('click', () => {
+      dashboardContent.classList.add('hidden');
+      verzoekFormContent.classList.remove('hidden');
+    });
+    annuleerBtn.addEventListener('click', () => {
+      verzoekFormContent.classList.add('hidden');
+      verzoekBevestiging.classList.add('hidden');
+      dashboardContent.classList.remove('hidden');
+      verzoekForm.reset();
+    });
+    verzoekForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      verzoekForm.classList.add('hidden');
+      verzoekBevestiging.classList.remove('hidden');
+      setTimeout(() => {
+        verzoekFormContent.classList.add('hidden');
+        verzoekBevestiging.classList.add('hidden');
+        dashboardContent.classList.remove('hidden');
+        verzoekForm.classList.remove('hidden');
+        verzoekForm.reset();
+      }, 2000);
+    });
+
+    // Navigatie: dashboard <-> open taken
+    const openTakenTile = document.getElementById('open-taken-tile');
+    const openTakenContent = document.getElementById('open-taken-content');
+    const backToDashboard = document.getElementById('back-to-dashboard');
+    const takenTabelContainer = document.getElementById('taken-tabel-container');
+    const taakDetailContainer = document.getElementById('taak-detail-container');
+    const taakZoekveld = document.getElementById('taak-zoekveld');
+    const filterStatus = document.getElementById('filter-status');
+    const filterPrio = document.getElementById('filter-prio');
+
+    let taken = [];
+    let geselecteerdeTaak = null;
+    let taakIdCounter = 100;
+    let monteurs = ['Jan Jansen', 'Sanne de Vries', 'Ali Yilmaz', 'Schoonmaakteam'];
+
+    function updateMonteurSelect() {
+      const select = document.getElementById('monteur-select');
+      select.innerHTML = '';
+      for (let m of monteurs) {
+        let opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      }
+    }
+
+    function renderNieuweTaakForm() {
+      const container = document.getElementById('nieuwe-taak-form-container');
+      container.classList.remove('hidden');
+      container.innerHTML = `
+        <form id='nieuwe-taak-form' style='background:#f7f8fa; border-radius:10px; padding:16px 14px; margin-bottom:16px; display:flex; flex-wrap:wrap; gap:12px;'>
+          <input type='text' id='nt-omschrijving' placeholder='Omschrijving*' required style='flex:2; min-width:180px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+          <input type='text' id='nt-locatie' placeholder='Locatie*' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+          <select id='nt-monteur' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+            <option value=''>Toewijzen aan monteur*</option>
+            ${monteurs.map(m=>`<option>${m}</option>`).join('')}
+          </select>
+          <input type='text' id='nt-verantwoordelijke' placeholder='Verantwoordelijke*' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+          <select id='nt-prioriteit' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+            <option value=''>Prioriteit*</option>
+            <option>Hoog</option>
+            <option>Normaal</option>
+            <option>Laag</option>
+          </select>
+          <select id='nt-status' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+            <option value=''>Status*</option>
+            <option>Nieuw</option>
+            <option>In behandeling</option>
+            <option>Wacht op onderdelen</option>
+            <option>Afgerond</option>
+          </select>
+          <input type='date' id='nt-deadline' required style='flex:1; min-width:120px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+          <input type='text' id='nt-materialen' placeholder='Benodigde materialen/gereedschappen' style='flex:2; min-width:180px; padding:6px; border-radius:6px; border:1px solid #ccc;'>
+          <textarea id='nt-checklist' placeholder='Checklist (1 stap per regel)' style='flex:2; min-width:180px; padding:6px; border-radius:6px; border:1px solid #ccc; resize:vertical;'></textarea>
+          <input type='file' id='nt-bijlage' accept='image/*,.pdf,.doc,.docx' style='flex:2; min-width:180px;'>
+          <button type='submit' style='background:#27ae60; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1em; cursor:pointer;'>Toevoegen</button>
+          <button type='button' id='annuleer-nieuwe-taak' style='background:#eee; color:#333; border:none; border-radius:6px; padding:8px 18px; font-size:1em; cursor:pointer;'>Annuleren</button>
+        </form>
+      `;
+      document.getElementById('annuleer-nieuwe-taak').onclick = () => {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+      };
+      document.getElementById('nieuwe-taak-form').onsubmit = function(e) {
+        e.preventDefault();
+        const omschrijving = document.getElementById('nt-omschrijving').value.trim();
+        const locatie = document.getElementById('nt-locatie').value.trim();
+        const monteur = document.getElementById('nt-monteur').value;
+        const verantwoordelijke = document.getElementById('nt-verantwoordelijke').value.trim();
+        const prioriteit = document.getElementById('nt-prioriteit').value;
+        const status = document.getElementById('nt-status').value;
+        const deadline = document.getElementById('nt-deadline').value;
+        const materialen = document.getElementById('nt-materialen').value.trim();
+        const checklistRaw = document.getElementById('nt-checklist').value.trim();
+        const checklist = checklistRaw ? checklistRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [];
+        let bijlageNaam = '';
+        const bijlageInput = document.getElementById('nt-bijlage');
+        if (bijlageInput && bijlageInput.files && bijlageInput.files[0]) {
+          bijlageNaam = bijlageInput.files[0].name;
+        }
+        if (!omschrijving || !locatie || !monteur || !verantwoordelijke || !prioriteit || !status || !deadline) return;
+        taakIdCounter++;
+        taken.push({
+          id: taakIdCounter,
+          omschrijving,
+          locatie,
+          monteur,
+          verantwoordelijke,
+          prioriteit,
+          status,
+          deadline,
+          materialen,
+          checklist,
+          checklistStatus: checklist.map(()=>false),
+          bijlage: bijlageNaam,
+          monteurOpmerking: '',
+          monteurFoto: '',
+          logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'Taak aangemaakt' } ]
+        });
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        renderTakenTabel();
+        renderMonteurTodo();
+      };
+    }
+
+    function renderTakenTabel() {
+      document.getElementById('nieuwe-taak-form-container').classList.add('hidden');
+      taakDetailContainer.classList.add('hidden');
+      takenTabelContainer.classList.remove('hidden');
+      let zoek = (taakZoekveld?.value || '').toLowerCase();
+      let status = filterStatus?.value || '';
+      let prio = filterPrio?.value || '';
+      let gefilterd = taken.filter(t =>
+        (!zoek || t.omschrijving.toLowerCase().includes(zoek) || t.locatie.toLowerCase().includes(zoek)) &&
+        (!status || t.status === status) &&
+        (!prio || t.prioriteit === prio)
+      );
+      let html = `<table style="width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px #0001;">
+        <thead><tr style="background:#f7f8fa;"><th style="padding:8px;">#</th><th>Omschrijving</th><th>Monteur</th><th>Prio</th><th>Status</th><th>Deadline</th><th>Verantwoordelijke</th><th>Locatie</th><th></th></tr></thead>
+        <tbody>`;
+      if (gefilterd.length === 0) {
+        html += `<tr><td colspan="9" style="text-align:center; padding:16px; color:#888;">Geen taken gevonden</td></tr>`;
+      } else {
+        for (let taak of gefilterd) {
+          html += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:8px;">${taak.id}</td>
+            <td>${taak.omschrijving}</td>
+            <td>${taak.monteur}</td>
+            <td><span style="color:${taak.prioriteit==='Hoog'?'#e74c3c':taak.prioriteit==='Normaal'?'#2980b9':'#27ae60'}; font-weight:bold;">${taak.prioriteit}</span></td>
+            <td><span style="background:${taak.status==='Nieuw'?'#eee':taak.status==='In behandeling'?'#2980b9':taak.status==='Wacht op onderdelen'?'#e67e22':'#27ae60'}; color:${taak.status==='Nieuw'?'#333':'#fff'}; border-radius:8px; padding:2px 8px; font-size:0.95em;">${taak.status}</span></td>
+            <td>${taak.deadline}</td>
+            <td>${taak.verantwoordelijke}</td>
+            <td>${taak.locatie}</td>
+            <td><button onclick="toonTaakDetail(${taak.id})" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:4px 10px; cursor:pointer;">Details</button></td>
+          </tr>`;
+        }
+      }
+      html += '</tbody></table>';
+      takenTabelContainer.innerHTML = html;
+    }
+
+    // --- MOCKUP ERP/CTQ TAKEN ---
+    let ctqTaken = [
+      {
+        id: 1,
+        omschrijving: 'Afstand v/d benaderingsschakelaars v/d wagen t.o.v. van de strip met benaderingsschakelaars',
+        asset: 'Controlewagen gereedschap CAR-1',
+        frequentie: 'Wekelijks',
+        norm: 'Zie ERP',
+        instructies: 'Meet de afstand tussen de benaderingsschakelaars en de strip. Noteer de waarde.',
+        checklist: ['Meet afstand A', 'Controleer bevestiging', 'Noteer waarde in systeem'],
+        checklistStatus: [false, false, false],
+        resultaat: '', // OK/NOK
+        toelichting: '',
+        bijlage: '',
+        status: 'Open',
+        opmerking: '',
+        monteur: 'Jan Jansen',
+        deadline: '2024-07-01',
+        logboek: [ { datum: '2024-06-30', tekst: 'Taak automatisch gegenereerd uit ERP' } ]
+      }
+    ];
+
+    // --- MOCKUP CTQ-PLANNING ---
+    let ctqPlanning = [
+      {
+        id: 1,
+        omschrijving: 'Afstand v/d benaderingsschakelaars v/d wagen t.o.v. van de strip',
+        asset: 'Controlewagen gereedschap CAR-1',
+        frequentie: 'Wekelijks',
+        datum: '2024-07-02',
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Meet afstand A', 'Controleer bevestiging', 'Noteer waarde in systeem'],
+        checklistStatus: [false, false, false],
+        resultaat: '',
+        instructies: 'Meet de afstand tussen de benaderingsschakelaars en de strip. Noteer de waarde.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: '2024-06-30', tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Steeksleutel 13, kruiskopschroevendraaier',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Werkplaats 1',
+        duur: '30 minuten'
+      },
+      {
+        id: 2,
+        omschrijving: 'Smering lagers transportband',
+        asset: 'Transportband 2',
+        frequentie: 'Maandelijks',
+        datum: '2024-07-03',
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Controleer vetniveau', 'Smeer lagers', 'Controleer werking'],
+        checklistStatus: [false, false, false],
+        resultaat: '',
+        instructies: 'Controleer het vetniveau en smeer de lagers volgens het onderhoudsplan.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: '2024-06-30', tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Vetspuit, steeksleutel 13',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Hal 2',
+        duur: '20 minuten'
+      },
+      {
+        id: 3,
+        omschrijving: 'Inspectie noodstoppen',
+        asset: 'Lijn 1',
+        frequentie: 'Wekelijks',
+        datum: '2024-07-04',
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Test alle noodstoppen', 'Noteer bevindingen'],
+        checklistStatus: [false, false],
+        resultaat: '',
+        instructies: 'Test alle noodstoppen en noteer de bevindingen in het systeem.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: '2024-06-30', tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Testpen',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Lijn 1',
+        duur: '15 minuten'
+      },
+      {
+        id: 99,
+        omschrijving: 'Inspectie transportband aandrijving',
+        instructies: 'Controleer de spanning van de aandrijfriem, inspecteer de lagers op slijtage en controleer de noodstoppen. Noteer bijzonderheden.',
+        frequentie: 'Maandelijks',
+        datum: '2024-07-05',
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        duur: '45 minuten',
+        locatie: 'Hal 2, lijn 4',
+        asset: 'Transportband 4',
+        checklist: ['Controleer riemspanning', 'Inspecteer lagers', 'Test noodstoppen'],
+        checklistStatus: [false, false, false],
+        resultaat: '',
+        toelichting: 'Let op: machine mag niet draaien tijdens inspectie.',
+        bijlage: 'inspectiehandleiding.pdf',
+        opmerking: '',
+        logboek: [ { datum: '2024-07-01', tekst: 'Taak aangemaakt door chef' } ],
+        tools: 'Steeksleutel 13, kruiskopschroevendraaier, vetspuit',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C'
+      },
+      {
+        id: 101,
+        omschrijving: 'Vervangen lager transportband 3',
+        asset: 'Transportband 3',
+        frequentie: 'Maandelijks',
+        datum: (function(){let d=new Date();d.setDate(d.getDate()+7);return d.toISOString().slice(0,10);})(),
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Demonteer lager', 'Plaats nieuw lager', 'Test werking'],
+        checklistStatus: [false, false, false],
+        resultaat: '',
+        instructies: 'Demonteer het oude lager, plaats het nieuwe lager en test de werking.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Steeksleutel 17, vetspuit',
+        onderdelen: 'Lager type X, vet',
+        locatie: 'Transportband 3',
+        duur: '35 minuten'
+      },
+      {
+        id: 102,
+        omschrijving: 'Inspectie noodstoppen lijn 2',
+        asset: 'Lijn 2',
+        frequentie: 'Wekelijks',
+        datum: (function(){let d=new Date();d.setDate(d.getDate()+10);return d.toISOString().slice(0,10);})(),
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Test alle noodstoppen', 'Noteer bevindingen'],
+        checklistStatus: [false, false],
+        resultaat: '',
+        instructies: 'Test alle noodstoppen en noteer de bevindingen in het systeem.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Testpen',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Lijn 2',
+        duur: '15 minuten'
+      },
+      {
+        id: 103,
+        omschrijving: 'Smering lagers ventilator',
+        asset: 'Ventilator 1',
+        frequentie: 'Maandelijks',
+        datum: (function(){let d=new Date();d.setDate(d.getDate()+13);return d.toISOString().slice(0,10);})(),
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Controleer vetniveau', 'Smeer lagers'],
+        checklistStatus: [false, false],
+        resultaat: '',
+        instructies: 'Controleer het vetniveau en smeer de lagers volgens het onderhoudsplan.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Vetspuit',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Ventilator 1',
+        duur: '20 minuten'
+      },
+      {
+        id: 104,
+        omschrijving: 'Kalibratie temperatuursensor',
+        asset: 'Oven 2',
+        frequentie: 'Jaarlijks',
+        datum: (function(){let d=new Date();d.setDate(d.getDate()+21);return d.toISOString().slice(0,10);})(),
+        status: 'Niet toegewezen',
+        toegewezenMonteur: '',
+        geplandTijdstip: '',
+        checklist: ['Sluit sensor aan', 'Voer kalibratie uit'],
+        checklistStatus: [false, false],
+        resultaat: '',
+        instructies: 'Sluit de sensor aan en voer de kalibratie uit volgens de handleiding.',
+        toelichting: '',
+        opmerking: '',
+        logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'CTQ-taak automatisch gepland' } ],
+        tools: 'Kalibratiekit',
+        onderdelen: 'Onderdeel A, Onderdeel B, Onderdeel C',
+        locatie: 'Oven 2',
+        duur: '25 minuten'
+      }
+    ];
+
+    // Voeg extra velden toe aan ctqPlanning mockdata
+    ctqPlanning.forEach(t => {
+      if (t.geplandTijdstip === undefined) t.geplandTijdstip = '';
+      if (t.downtimeNodig === undefined) t.downtimeNodig = false;
+      if (t.productieAkkoord === undefined) t.productieAkkoord = false;
+      if (t.opmerkingProductie === undefined) t.opmerkingProductie = '';
+      if (t.duur === undefined) t.duur = '';
+    });
+
+    // Zet geplandTijdstip van voorbeeldtaak op vandaag
+    const vandaag = new Date();
+    const yyyy = vandaag.getFullYear();
+    const mm = String(vandaag.getMonth()+1).padStart(2,'0');
+    const dd = String(vandaag.getDate()).padStart(2,'0');
+    const vandaagStr = `${yyyy}-${mm}-${dd}`;
+    ctqPlanning.forEach(t => {
+      if (t.id === 99) t.geplandTijdstip = `${vandaagStr}T10:30`;
+    });
+
+    // --- VERVANG renderMonteurTodo DOOR EEN CTQ-VERSIE ---
+    function renderMonteurTodo() {
+      const monteur = document.getElementById('monteur-select').value;
+      const title = document.getElementById('monteur-todo-title');
+      const list = document.getElementById('monteur-todo-list');
+      const detail = document.getElementById('monteur-taak-detail');
+      detail.classList.add('hidden');
+      title.textContent = `Jouw planning (${monteur})`;
+      // Huidige datum
+      const vandaag = new Date().toISOString().slice(0,10);
+      // Geplande taken vandaag (met tijdslot)
+      let geplandeTaken = ctqPlanning.filter(t =>
+        t.status === 'Toegewezen' &&
+        t.toegewezenMonteur === monteur &&
+        typeof t.geplandTijdstip === 'string' &&
+        t.geplandTijdstip.trim() !== '' &&
+        t.geplandTijdstip.slice(0,10) === vandaag
+      ).sort((a,b) => a.geplandTijdstip.localeCompare(b.geplandTijdstip));
+      // Flexibele taken vandaag (geen tijdslot, wel deadline vandaag)
+      let flexTaken = ctqPlanning.filter(t => {
+        if (t.status !== 'Toegewezen' || t.toegewezenMonteur !== monteur) return false;
+        if (typeof t.geplandTijdstip === 'string' && t.geplandTijdstip.trim() !== '') return false;
+        if (!t.datum) return false;
+        return t.datum === vandaag;
+      });
+      // Tijdslijn
+      let tijdslijnHtml = '<h4 style="margin-bottom:8px;">Geplande taken vandaag</h4>';
+      if (geplandeTaken.length === 0) {
+        tijdslijnHtml += '<div style="color:#888;">Geen geplande taken voor vandaag.</div>';
+      } else {
+        tijdslijnHtml += '<div style="border-left:3px solid #27ae60; padding-left:18px;">' +
+          geplandeTaken.map(taak => {
+            const tijd = taak.geplandTijdstip.slice(11,16);
+            let eindtijd = '';
+            if (tijd && taak.duur) {
+              // Bereken eindtijd
+              let [h,m] = tijd.split(':').map(Number);
+              let min = parseDuurNaarMinuten(taak.duur);
+              let d = new Date();
+              d.setHours(h, m, 0, 0);
+              d.setMinutes(d.getMinutes() + min);
+              eindtijd = d.toTimeString().slice(0,5);
+            }
+            let tijdslot = eindtijd ? `${tijd} - ${eindtijd}` : tijd;
+            return `<div style='margin-bottom:18px; position:relative;'>
+              <div style='position:absolute; left:-27px; top:2px; width:16px; height:16px; border-radius:50%; background:#27ae60;'></div>
+              <span style='font-weight:bold;'>${tijdslot}</span> - ${taak.omschrijving} ${taak.downtimeNodig?'<span title="Downtime vereist" style="color:#e74c3c; font-size:1.2em; margin-left:6px;">&#9888;</span>':''}
+              <button onclick="toonCtqTaakDetail(${taak.id})" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:2px 10px; margin-left:10px; cursor:pointer;">Details</button>
+            </div>`;
+          }).join('') + '</div>';
+      }
+      // Flex taken vandaag
+      let flexHtml = '<h4 style="margin:18px 0 8px 0;">Flexibele taken vandaag</h4>';
+      if (flexTaken.length === 0) {
+        flexHtml += '<div style="color:#888;">Geen flexibele taken vandaag.</div>';
+      } else {
+        flexHtml += '<ul style="list-style:none; padding-left:0;">' +
+          flexTaken.map(taak => `
+            <li style='margin-bottom:10px;'>
+              <span style='font-weight:bold;'>${taak.omschrijving}</span> (uiterlijk <b>${taak.datum}</b>)
+              <button onclick="toonCtqTaakDetail(${taak.id})" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:2px 10px; margin-left:10px; cursor:pointer;">Details</button>
+            </li>
+          `).join('') + '</ul>';
+      }
+      list.innerHTML = tijdslijnHtml + flexHtml;
+    }
+
+    // Vervang toonCtqTaakDetail door een modale versie
+    window.toonCtqTaakDetail = function(id) {
+      let taak = ctqPlanning.find(t => t.id === id);
+      if (!taak) return;
+      let omschrijvingUitgebreid = taak.instructies || taak.toelichting || '';
+      let fields = '';
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-calendar-alt"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Datum</span>${taak.datum}</div></div>`;
+      if (taak.geplandTijdstip) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-clock"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Gepland tijdstip</span>${taak.geplandTijdstip.replace('T',' ')}</div></div>`;
+      if (taak.duur) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-stopwatch"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Verwachte duur</span>${taak.duur}</div></div>`;
+      if (taak.tools) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-tools"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Tools</span>${taak.tools}</div></div>`;
+      if (taak.onderdelen) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-cogs"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Onderdelen</span>${taak.onderdelen}</div></div>`;
+      if (taak.locatie) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-location-dot"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Locatie</span>${taak.locatie}</div></div>`;
+      if (taak.asset) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class="fas fa-industry"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Asset</span>${taak.asset}</div></div>`;
+      let html = `
+        <h2 style='margin-top:0; font-size:1.45em; margin-bottom:10px;'>${taak.omschrijving}</h2>
+        ${omschrijvingUitgebreid ? `<div class='taak-popup-omschrijving'>${omschrijvingUitgebreid}</div>` : ''}
+        <div class='taak-popup-fields'>${fields}</div>
+        <div class='taak-popup-action-btn-wrap'>
+          <button id='taak-uitvoeren-btn' class='taak-popup-action-btn' type='button'>
+            <span class='taak-popup-icoon' style='color:#fff; font-size:1.3em;'><i class="fas fa-play"></i></span>Taak uitvoeren
+          </button>
+        </div>
+      `;
+      showTaakModal(html);
+      setTimeout(()=>{
+        const btn = document.getElementById('taak-uitvoeren-btn');
+        if(btn) btn.onclick = function() {
+          btn.innerHTML = '<span class="taak-popup-icoon" style="color:#fff; font-size:1.3em;"><i class="fas fa-check"></i></span> Taak gestart!';
+          btn.style.background = '#2980b9';
+          btn.disabled = true;
+          setTimeout(()=>{
+            document.getElementById('taak-modal-bg').style.display = 'none';
+          }, 1200);
+        };
+      }, 100);
+    }
+
+    window.afmeldenCtqTaak = function(id) {
+      let taak = ctqTaken.find(t => t.id === id);
+      if (!taak) return;
+      taak.status = 'Afgerond';
+      taak.logboek.push({datum: new Date().toISOString().slice(0,10), tekst: 'CTQ-taak afgemeld door monteur'});
+      renderMonteurTodo();
+    };
+
+    // Switch tussen Chef en Monteur view
+    function updateRoleView() {
+      const rol = document.getElementById('rol-select').value;
+      const chefView = document.getElementById('chef-view');
+      const monteurView = document.getElementById('monteur-view');
+      const monteurSelect = document.getElementById('monteur-select');
+      if (rol === 'chef') {
+        chefView.classList.remove('hidden');
+        monteurView.classList.add('hidden');
+        monteurSelect.style.display = 'none';
+        // Activeer standaard de CTQ-tab
+        document.getElementById('chef-tab-ctq').click();
+        renderChefCtqPlanning();
+      } else {
+        chefView.classList.add('hidden');
+        monteurView.classList.remove('hidden');
+        monteurSelect.style.display = '';
+        renderMonteurTodo();
+      }
+    }
+
+    document.getElementById('rol-select').addEventListener('change', updateRoleView);
+    document.getElementById('monteur-select').addEventListener('change', renderMonteurTodo);
+
+    // Init
+    updateMonteurSelect();
+    updateRoleView();
+
+    if (openTakenTile) {
+      openTakenTile.addEventListener('click', () => {
+        dashboardContent.classList.add('hidden');
+        openTakenContent.classList.remove('hidden');
+        updateRoleView();
+      });
+    }
+
+    // Voeg een modaal toe voor toewijzen
+    const chefModalHtml = `
+      <div id="chef-modal-bg" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0008; z-index:1000; align-items:center; justify-content:center;">
+        <div id="chef-modal" style="background:#fff; border-radius:12px; max-width:420px; width:90vw; margin:auto; padding:24px 20px; box-shadow:0 8px 32px #0003; position:relative;">
+          <button id="chef-modal-close" style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.3em; cursor:pointer; color:#888;">&times;</button>
+          <div id="chef-modal-content"></div>
+        </div>
+      </div>
+    `;
+    if (!document.getElementById('chef-modal-bg')) {
+      document.body.insertAdjacentHTML('beforeend', chefModalHtml);
+    }
+
+    // ... bestaande code ...
+    // Chef-modal overlay en popup: altijd binnen .ipad-container, nooit in body
+    function ensureChefModalInIpadContainer() {
+      // Verwijder ALLE bestaande modals uit body én ipad-container
+      document.querySelectorAll('#chef-modal-bg').forEach(el => el.remove());
+      // Voeg ALTIJD toe aan .ipad-container
+      const chefModalHtml = `
+        <div id="chef-modal-bg" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#0008; z-index:1000; align-items:center; justify-content:center;">
+          <div id="chef-modal" style="background:#fff; border-radius:12px; max-width:520px; width:95%; margin:auto; padding:32px 20px 28px 20px; box-shadow:0 8px 32px #0003; position:relative;">
+            <button id="chef-modal-close" style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.3em; cursor:pointer; color:#888;">&times;</button>
+            <div id="chef-modal-content"></div>
+          </div>
+        </div>
+      `;
+      const ipadContainer = document.querySelector('.ipad-container');
+      if (ipadContainer) {
+        ipadContainer.insertAdjacentHTML('beforeend', chefModalHtml);
+      }
+    }
+    // ... bestaande code ...
+    // Pas showChefModal aan zodat deze altijd de modal in de juiste container aanmaakt
+    function showChefModal(contentHtml) {
+      ensureChefModalInIpadContainer();
+      document.getElementById('chef-modal-content').innerHTML = contentHtml;
+      document.getElementById('chef-modal-bg').style.display = 'flex';
+      document.getElementById('chef-modal-close').onclick = function() {
+        document.getElementById('chef-modal-bg').style.display = 'none';
+      };
+    }
+    // ... bestaande code ...
+
+    // --- Chef detail en toewijzing ---
+    window.chefShowCtqDetail = function(id) {
+      const taak = ctqPlanning.find(t => t.id === id);
+      if (!taak) return;
+      let monteurOpties = monteurs.map(m => `<option value="${m}"${taak.toegewezenMonteur===m?' selected':''}>${m}</option>`).join('');
+      let tools = taak.tools || '-';
+      let onderdelen = taak.onderdelen || '-';
+      let duur = taak.duur || '-';
+      let locatie = taak.locatie || '-';
+      let asset = taak.asset || '-';
+      let fields = '';
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-calendar-alt\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Datum</span>${taak.datum}</div></div>`;
+      // Alleen tijd invoeren bij gepland tijdstip
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-clock\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Gepland tijdstip&nbsp;<span style='font-weight:normal;'>(indien nodig)</span></span><input type='time' id='chef-planning-tijdstip' value=\"${taak.geplandTijdstip ? (taak.geplandTijdstip.split('T')[1] || '').slice(0,5) : ''}\" style='width:70%; padding:6px; border-radius:6px; border:1px solid #ccc;'></div></div>`;
+      // Bewerkbare verwachte duur direct na gepland tijdstip
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-stopwatch\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Verwachte duur</span><input type='text' id='chef-duur' value=\"${duur}\" style='width:70%; padding:6px; border-radius:6px; border:1px solid #ccc;'></div></div>`;
+      // Monteur dropdown breder
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-user\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Monteur</span><select id='chef-monteur-select' required style='width:90%; padding:6px; border-radius:6px; border:1px solid #ccc;'><option value=''>Kies monteur...</option>${monteurOpties}</select></div></div>`;
+      if (taak.tools) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-tools\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Tools</span>${tools}</div></div>`;
+      if (taak.onderdelen) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-cogs\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Onderdelen</span>${onderdelen}</div></div>`;
+      fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-location-dot\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Locatie</span>${locatie}</div></div>`;
+      if (taak.asset) fields += `<div class='taak-popup-fieldbox'><span class='taak-popup-icoon'><i class=\"fas fa-industry\"></i></span><div class='taak-popup-fieldcontent'><span class='taak-popup-label'>Asset</span>${asset}</div></div>`;
+      let omschrijvingUitgebreid = taak.instructies || taak.toelichting || '';
+      let html = `
+        <h2 style='margin-top:0; font-size:1.45em; margin-bottom:10px;'>${taak.omschrijving}</h2>
+        ${omschrijvingUitgebreid ? `<div class='taak-popup-omschrijving' style='color:#444; font-size:1em; margin-bottom:12px;'>${omschrijvingUitgebreid}</div>` : ''}
+        <form id='chef-toewijs-form'>
+          <div class='taak-popup-fields'>${fields}</div>
+          <div class='taak-popup-action-btn-wrap'>
+            <button type='submit' class='taak-popup-action-btn' style='background:#27ae60; color:#fff; border:none; border-radius:12px; width:100%; padding:10px 0; font-size:1.1em; display:flex; align-items:center; justify-content:center;'>
+              <span class='taak-popup-icoon' style='color:#fff; font-size:1.3em; margin-right:8px;'><i class=\"fas fa-save\"></i></span>Opslaan
+            </button>
+          </div>
+        </form>
+      `;
+      showChefModal(html);
+      document.getElementById('chef-toewijs-form').onsubmit = function(e) {
+        e.preventDefault();
+        let monteur = document.getElementById('chef-monteur-select').value;
+        let tijdstip = document.getElementById('chef-planning-tijdstip').value;
+        let duurInput = document.getElementById('chef-duur').value;
+        if (!monteur) return;
+        // Overlap-check alleen als er een tijd is ingevuld
+        if (tijdstip && duurInput) {
+          let datum = taak.datum;
+          let start = tijdstip;
+          let [sh, sm] = start.split(':').map(Number);
+          let duurMin = 0;
+          let match = duurInput.match(/(\d+)\s*u(?:ur)?/i);
+          if (match) duurMin += parseInt(match[1],10)*60;
+          match = duurInput.match(/(\d+)\s*m(?:in)?/i);
+          if (match) duurMin += parseInt(match[1],10);
+          match = duurInput.match(/(\d+)\s*u(?:ur)?\s*(\d+)?\s*m(?:in)?/i);
+          if (match) duurMin = parseInt(match[1],10)*60 + (match[2]?parseInt(match[2],10):0);
+          let startMin = sh*60+sm;
+          let endMin = startMin+duurMin;
+          // Check alle taken van deze monteur op deze datum
+          let overlap = ctqPlanning.some(t =>
+            t !== taak &&
+            t.status === 'Toegewezen' &&
+            t.toegewezenMonteur === monteur &&
+            t.geplandTijdstip &&
+            t.geplandTijdstip.slice(0,10) === datum &&
+            t.duur &&
+            (() => {
+              let [th, tm] = t.geplandTijdstip.slice(11,16).split(':').map(Number);
+              let tStart = th*60+tm;
+              let tDuur = 0;
+              let m = t.duur.match(/(\d+)\s*u(?:ur)?/i); if (m) tDuur += parseInt(m[1],10)*60;
+              m = t.duur.match(/(\d+)\s*m(?:in)?/i); if (m) tDuur += parseInt(m[1],10);
+              m = t.duur.match(/(\d+)\s*u(?:ur)?\s*(\d+)?\s*m(?:in)?/i); if (m) tDuur = parseInt(m[1],10)*60 + (m[2]?parseInt(m[2],10):0);
+              let tEnd = tStart+tDuur;
+              return (startMin < tEnd && endMin > tStart);
+            })()
+          );
+          if (overlap) {
+            // Toon modale popup met foutmelding
+            if (!document.getElementById('chef-overlap-modal')) {
+              const modal = document.createElement('div');
+              modal.id = 'chef-overlap-modal';
+              modal.style = 'position:fixed; z-index:2000; left:0; top:0; width:100vw; height:100vh; background:#0007; display:flex; align-items:center; justify-content:center;';
+              modal.innerHTML = `
+                <div style='background:#fff; border-radius:12px; max-width:340px; width:90vw; padding:32px 18px 22px 18px; box-shadow:0 8px 32px #0003; text-align:center; position:relative;'>
+                  <div style='color:#e74c3c; font-weight:600; font-size:1.13em; margin-bottom:18px;'>Deze tijd is voor deze monteur niet beschikbaar (overlap met andere taak).</div>
+                  <button id='chef-overlap-close' style='background:#2980b9; color:#fff; border:none; border-radius:8px; padding:8px 22px; font-size:1.08em; font-weight:600; cursor:pointer;'>Sluiten</button>
+                </div>
+              `;
+              document.body.appendChild(modal);
+              document.getElementById('chef-overlap-close').onclick = function() {
+                modal.remove();
+              };
+            }
+            return;
+          } else {
+            let fout = document.getElementById('chef-overlap-fout');
+            if (fout) fout.remove();
+          }
+        }
+        // Combineer datum en tijd tot een ISO string
+        taak.toegewezenMonteur = monteur;
+        taak.status = 'Toegewezen';
+        if (tijdstip) {
+          taak.geplandTijdstip = taak.datum + 'T' + tijdstip;
+        } else {
+          taak.geplandTijdstip = '';
+        }
+        taak.duur = duurInput;
+        taak.logboek.push({datum: new Date().toISOString().slice(0,10), tekst: 'Gepland door chef'});
+        document.getElementById('chef-modal-bg').style.display = 'none';
+        renderChefCtqPlanning();
+        renderMonteurTodo();
+      };
+    };
+
+    // --- Chef planning renderen met detailknop ---
+    function renderChefCtqPlanning() {
+      const container = document.getElementById('chef-ctq-planning');
+      if (!container) return;
+      // Filters
+      let monteurOpties = monteurs.map(m => `<option value="${m}">${m}</option>`).join('');
+      let filterHtml = `<div class='ctq-filterbar'>
+        <label>Filter monteur: <select id='ctq-filter-monteur'><option value=''>Alle monteurs</option>${monteurOpties}</select></label>
+        <label>Status: <select id='ctq-filter-status'><option value=''>Alles</option><option value='Niet toegewezen'>Niet toegewezen</option><option value='Toegewezen'>Toegewezen</option></select></label>
+        <span>Niet toegewezen <span class='ctq-badge-count' id='ctq-badge-niet'></span></span>
+      </div>`;
+      // Data
+      let filterMonteur = '';
+      let filterStatus = '';
+      // Bij eerste render, filters leeg
+      if (window.ctqFilterMonteur !== undefined) filterMonteur = window.ctqFilterMonteur;
+      if (window.ctqFilterStatus !== undefined) filterStatus = window.ctqFilterStatus;
+      let nietToegewezen = ctqPlanning.filter(t => t.status === 'Niet toegewezen');
+      let toegewezen = ctqPlanning.filter(t => t.status === 'Toegewezen');
+      // Filteren
+      if (filterMonteur) toegewezen = toegewezen.filter(t => t.toegewezenMonteur === filterMonteur);
+      if (filterStatus === 'Niet toegewezen') toegewezen = [];
+      if (filterStatus === 'Toegewezen') nietToegewezen = [];
+      // Cards niet-toegewezen
+      let nietHtml = `<div class='ctq-card-list'>`;
+        for (let taak of nietToegewezen) {
+        nietHtml += `<div class='ctq-card'>
+          <div class='ctq-card-header'>
+            <span class='ctq-card-title'>${taak.omschrijving}</span>
+            <span class='ctq-badge status-niet'>Niet toegewezen</span>
+          </div>
+          <div class='ctq-card-row'><span class='ctq-card-label'>Datum:</span> ${taak.datum}</div>
+          <div class='ctq-card-row'><span class='ctq-card-label'>Asset:</span> ${taak.asset || '-'}</div>
+          <div class='ctq-card-actions'>
+            <button class='ctq-btn' onclick='window.chefShowCtqDetail(${taak.id})'><i class="fas fa-user-plus"></i>Toewijzen</button>
+            <button class='ctq-btn details' onclick='window.chefShowCtqDetail(${taak.id})'><i class="fas fa-eye"></i>Details</button>
+          </div>
+        </div>`;
+      }
+      nietHtml += `</div>`;
+      // Cards toegewezen
+      let toegewezenHtml = `<div class='ctq-card-list'>`;
+        for (let taak of toegewezen) {
+        toegewezenHtml += `<div class='ctq-card'>
+          <div class='ctq-card-header'>
+            <span class='ctq-card-title'>${taak.omschrijving}</span>
+            <span class='ctq-badge status-toegewezen'>Toegewezen</span>
+          </div>
+          <div class='ctq-card-row'><span class='ctq-card-label'>Datum:</span> ${taak.datum}</div>
+          <div class='ctq-card-row'><span class='ctq-card-label'>Monteur:</span> ${taak.toegewezenMonteur || '-'}</div>
+          <div class='ctq-card-row'><span class='ctq-card-label'>Gepland:</span> ${taak.geplandTijdstip ? taak.geplandTijdstip.replace('T',' ') : '-'}</div>
+          <div class='ctq-card-actions'>
+            <button class='ctq-btn details' onclick='window.chefShowCtqDetail(${taak.id})'><i class="fas fa-eye"></i>Details</button>
+          </div>
+        </div>`;
+      }
+      toegewezenHtml += `</div>`;
+      // Renderen
+      container.innerHTML = filterHtml +
+        `<h4 style='margin:18px 0 8px 0;'>Niet toegewezen <span class='ctq-badge-count'>${nietToegewezen.length}</span></h4>` +
+        nietHtml +
+        `<h4 style='margin:18px 0 8px 0;'>Toegewezen <span class='ctq-badge-count'>${toegewezen.length}</span></h4>` +
+        toegewezenHtml;
+      // Filter event listeners
+      document.getElementById('ctq-filter-monteur').value = filterMonteur;
+      document.getElementById('ctq-filter-status').value = filterStatus;
+      document.getElementById('ctq-filter-monteur').onchange = function() {
+        window.ctqFilterMonteur = this.value;
+        renderChefCtqPlanning();
+      };
+      document.getElementById('ctq-filter-status').onchange = function() {
+        window.ctqFilterStatus = this.value;
+        renderChefCtqPlanning();
+      };
+      // Badge updaten
+      document.getElementById('ctq-badge-niet').textContent = nietToegewezen.length;
+    }
+
+    // Terugknop open taken -> dashboard
+    if (backToDashboard) {
+      backToDashboard.addEventListener('click', () => {
+        openTakenContent.classList.add('hidden');
+        dashboardContent.classList.remove('hidden');
+        // Sluit eventueel open modals/detailvensters
+        const chefModalBg = document.getElementById('chef-modal-bg');
+        if (chefModalBg) chefModalBg.style.display = 'none';
+        const monteurDetail = document.getElementById('monteur-taak-detail');
+        if (monteurDetail) monteurDetail.classList.add('hidden');
+      });
+    }
+
+    // Zorg dat de modale sluitknop altijd werkt
+    const chefModalClose = document.getElementById('chef-modal-close');
+    if (chefModalClose) {
+      chefModalClose.onclick = function() {
+        document.getElementById('chef-modal-bg').style.display = 'none';
+      };
+    }
+
+    // Zorg dat de terugknop in monteur-detail altijd werkt
+    window.closeMonteurDetail = function() {
+      const detail = document.getElementById('monteur-taak-detail');
+      if (detail) detail.classList.add('hidden');
+    };
+
+    // Voeg modale HTML toe direct na chef-modal
+    if (!document.getElementById('taak-modal-bg')) {
+      const taakModalHtml = `
+        <div id="taak-modal-bg" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#0008; z-index:1000; align-items:center; justify-content:center;">
+          <div id="taak-modal" style="background:#fff; border-radius:12px; max-width:520px; width:95%; margin:auto; padding:32px 20px 28px 20px; box-shadow:0 8px 32px #0003; position:relative;">
+            <button id="taak-modal-close" style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.3em; cursor:pointer; color:#888;">&times;</button>
+            <div id="taak-modal-content"></div>
+          </div>
+        </div>
+      `;
+      // Voeg toe aan .ipad-container in plaats van body
+      const ipadContainer = document.querySelector('.ipad-container');
+      if (ipadContainer) {
+        ipadContainer.insertAdjacentHTML('beforeend', taakModalHtml);
+      } else {
+        document.body.insertAdjacentHTML('beforeend', taakModalHtml);
+      }
+    }
+
+    function showTaakModal(contentHtml) {
+      document.getElementById('taak-modal-content').innerHTML = contentHtml;
+      document.getElementById('taak-modal-bg').style.display = 'flex';
+      document.getElementById('taak-modal-close').onclick = function() {
+        document.getElementById('taak-modal-bg').style.display = 'none';
+      };
+    }
+
+    // Vervang toonTaakDetail door een versie die een modaal toont
+    window.toonTaakDetail = function(id) {
+      const taak = taken.find(t => t.id === id);
+      if (!taak) return;
+      let checklistHtml = '';
+      if (taak.checklist && taak.checklist.length) {
+        checklistHtml = '<h4>Checklist</h4><ul style="list-style:none; padding-left:0;">' +
+          taak.checklist.map((stap,i) => `<li style='margin-bottom:6px;'>${stap} <span style='color:${taak.checklistStatus[i]?'#27ae60':'#ccc'};'>&#10003;</span></li>`).join('') + '</ul>';
+      }
+      let logboekHtml = (taak.logboek||[]).map(l => `<div style='margin-bottom:4px; color:#555;'><b>${l.datum}:</b> ${l.tekst}</div>`).join('') || '';
+      let bijlageHtml = taak.bijlage ? `<div style='margin-bottom:8px;'><b>Bijlage:</b> ${taak.bijlage}</div>` : '';
+      let materialenHtml = taak.materialen ? `<div style='margin-bottom:8px;'><b>Materialen:</b> ${taak.materialen}</div>` : '';
+      let html = `
+        <h2 style='margin-top:0;'>${taak.omschrijving}</h2>
+        <div><b>Status:</b> ${taak.status}</div>
+        <div><b>Monteur:</b> ${taak.monteur}</div>
+        <div><b>Locatie:</b> ${taak.locatie}</div>
+        <div><b>Verantwoordelijke:</b> ${taak.verantwoordelijke}</div>
+        <div><b>Prioriteit:</b> ${taak.prioriteit}</div>
+        <div><b>Deadline:</b> ${taak.deadline}</div>
+        ${materialenHtml}
+        ${bijlageHtml}
+        ${checklistHtml}
+        ${logboekHtml ? `<h4>Logboek</h4><div style='background:#f7f8fa; border-radius:8px; padding:10px 12px; margin-bottom:12px;'>${logboekHtml}</div>` : ''}
+        <button id='start-taak-btn' style='background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1.1em; cursor:pointer; margin-top:10px;'>Start taak</button>
+      `;
+      showTaakModal(html);
+      document.getElementById('start-taak-btn').onclick = function() {
+        taak.status = 'In behandeling';
+        taak.logboek.push({datum: new Date().toISOString().slice(0,10), tekst: 'Taak gestart'});
+        showTaakModal(`<div style='text-align:center; padding:30px 0;'><b>Taak gestart!</b><br>Status is nu: In behandeling.</div>`);
+        setTimeout(()=>{
+          document.getElementById('taak-modal-bg').style.display = 'none';
+          renderTakenTabel();
+        }, 1200);
+      };
+    }
+
+    // Pas CSS van de popup aan voor meer witruimte boven/onder, compactere tekst, max-height en scrollbare inhoud
+    const taakModalCompactStyle = document.createElement('style');
+    taakModalCompactStyle.innerHTML = `
+      #taak-modal {
+        max-width: 520px;
+        width: 95%;
+        min-width: 0;
+        padding: 28px 16px 22px 16px;
+        font-size: 1em;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        box-sizing: border-box;
+      }
+      #taak-modal-content {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-bottom: 0;
+      }
+      .taak-popup-fields {
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .taak-popup-fieldbox {
+        font-size: 0.97em;
+        min-height: 38px;
+        padding: 12px 12px 10px 12px;
+      }
+      .taak-popup-fieldbox .taak-popup-icoon {
+        font-size: 1.18em;
+        min-width: 1.3em;
+      }
+      .taak-popup-label {
+        font-size: 1em;
+      }
+      .taak-popup-omschrijving {
+        font-size: 0.98em;
+        margin-bottom: 12px;
+      }
+      .taak-popup-action-btn-wrap {
+        margin-top: 18px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+      }
+      .taak-popup-action-btn {
+        min-height: 44px;
+        font-size: 1em;
+      }
+      @media (max-width: 700px) {
+        #taak-modal {
+          padding: 12px 2vw 10px 2vw;
+          font-size: 0.97em;
+          max-height: 96vh;
+        }
+        #taak-modal-content {
+          max-height: 68vh;
+        }
+        .taak-popup-action-btn-wrap {
+          margin-top: 10px;
+          margin-bottom: 4px;
+          padding-bottom: 4px;
+        }
+        .taak-popup-action-btn {
+          min-height: 38px;
+          font-size: 0.97em;
+        }
+      }
+    `;
+    document.head.appendChild(taakModalCompactStyle);
+
+    // --- Verzoeken array en logica ---
+    let verzoeken = [];
+    // Vang verzoeken uit het formulier op
+    verzoekForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // ... bestaande code ...
+      // Voeg verzoek toe aan array
+      verzoeken.push({
+        id: Date.now(),
+        categorie: document.getElementById('categorie').value,
+        onderwerp: document.getElementById('onderwerp').value,
+        omschrijving: document.getElementById('omschrijving').value,
+        locatie: document.getElementById('locatie').value,
+        prioriteit: document.getElementById('prioriteit').value,
+        contact: document.getElementById('contact').value,
+        status: 'Nieuw',
+        datum: new Date().toISOString().slice(0,10)
+      });
+      // ... bestaande code ...
+    });
+
+    function renderChefVerzoeken() {
+      const overzicht = document.getElementById('chef-verzoeken-overzicht');
+      if (!overzicht) return;
+      if (verzoeken.length === 0) {
+        overzicht.innerHTML = '<div style="color:#888;">Geen nieuwe verzoeken.</div>';
+        return;
+      }
+      let html = `<table style="width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px #0001;">
+        <thead><tr style="background:#f7f8fa;"><th>Datum</th><th>Onderwerp</th><th>Categorie</th><th>Status</th><th>Actie</th></tr></thead><tbody>`;
+      for (let v of verzoeken) {
+        html += `<tr><td>${v.datum}</td><td>${v.onderwerp}</td><td>${v.categorie}</td><td>${v.status}</td><td><button onclick="chefToonVerzoekDetail(${v.id})" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:4px 10px; cursor:pointer;">Details</button></td></tr>`;
+      }
+      html += '</tbody></table>';
+      overzicht.innerHTML = html;
+    }
+
+    window.chefToonVerzoekDetail = function(id) {
+      const v = verzoeken.find(x => x.id === id);
+      if (!v) return;
+      let html = `<h2 style='margin-top:0;'>${v.onderwerp}</h2>
+        <div><b>Categorie:</b> ${v.categorie}</div>
+        <div><b>Omschrijving:</b> ${v.omschrijving}</div>
+        <div><b>Locatie:</b> ${v.locatie}</div>
+        <div><b>Prioriteit:</b> ${v.prioriteit}</div>
+        <div><b>Contact:</b> ${v.contact}</div>
+        <div style='margin:14px 0;'>
+          <button onclick='chefVerzoekGoedkeuren(${v.id})' style='background:#27ae60; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1em; margin-right:8px; cursor:pointer;'>Goedkeuren & omzetten naar taak</button>
+          <button onclick='chefVerzoekAfkeuren(${v.id})' style='background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1em; cursor:pointer;'>Afkeuren</button>
+        </div>`;
+      showChefModal(html);
+    };
+
+    window.chefVerzoekGoedkeuren = function(id) {
+      const v = verzoeken.find(x => x.id === id);
+      if (!v) return;
+      // Zet om naar taak (toevoegen aan taken[])
+      taakIdCounter++;
+      taken.push({
+        id: taakIdCounter,
+        omschrijving: v.onderwerp,
+        locatie: v.locatie,
+        monteur: '',
+        verantwoordelijke: '',
+        prioriteit: v.prioriteit,
+        status: 'Nieuw',
+        deadline: '',
+        materialen: '',
+        checklist: [],
+        checklistStatus: [],
+        bijlage: '',
+        monteurOpmerking: '',
+        monteurFoto: '',
+        logboek: [ { datum: new Date().toISOString().slice(0,10), tekst: 'Taak aangemaakt uit verzoek' } ]
+      });
+      v.status = 'Goedgekeurd';
+      document.getElementById('chef-modal-bg').style.display = 'none';
+      renderChefVerzoeken();
+    };
+
+    window.chefVerzoekAfkeuren = function(id) {
+      const v = verzoeken.find(x => x.id === id);
+      if (!v) return;
+      v.status = 'Afgekeurd';
+      document.getElementById('chef-modal-bg').style.display = 'none';
+      renderChefVerzoeken();
+    };
+
+    // Tab functionaliteit
+    const chefTabCtq = document.getElementById('chef-tab-ctq');
+    const chefTabVerzoeken = document.getElementById('chef-tab-verzoeken');
+    const chefCtqTab = document.getElementById('chef-ctq-planning-tab');
+    const chefVerzoekenTab = document.getElementById('chef-verzoeken-tab');
+    chefTabCtq.onclick = function() {
+      chefTabCtq.style.background = '#27ae60';
+      chefTabCtq.style.color = '#fff';
+      chefTabVerzoeken.style.background = '#eee';
+      chefTabVerzoeken.style.color = '#333';
+      chefCtqTab.style.display = '';
+      chefVerzoekenTab.style.display = 'none';
+    };
+    chefTabVerzoeken.onclick = function() {
+      chefTabCtq.style.background = '#eee';
+      chefTabCtq.style.color = '#333';
+      chefTabVerzoeken.style.background = '#27ae60';
+      chefTabVerzoeken.style.color = '#fff';
+      chefCtqTab.style.display = 'none';
+      chefVerzoekenTab.style.display = '';
+      renderChefVerzoeken();
+    };
+
+    function renderChefUpcomingCtqs() {
+      const container = document.getElementById('chef-upcoming-content');
+      if (!container) return;
+      // Filter opties
+      let filterHtml = `<div class='ctq-upcoming-filterbar'>
+        <label>Toon: <select id='ctq-upcoming-filter'>
+          <option value=''>Alles</option>
+          <option value='actie'>Alleen actie vereist</option>
+          <option value='week'>Alleen deze week</option>
+        </select></label>
+      </div>`;
+      // Data ophalen (komende 4 weken)
+      const vandaag = new Date();
+      const vierWekenLater = new Date(); vierWekenLater.setDate(vierWekenLater.getDate() + 28);
+      let aankomend = ctqPlanning.filter(t => {
+        if (!t.datum) return false;
+        const d = new Date(t.datum);
+        return d >= vandaag && d <= vierWekenLater;
+      });
+      // Benodigdheden check: als t.materialen of t.benodigdheden niet leeg is, en t.materialenStatus !== 'ok', dan actie vereist
+      function heeftActieNodig(taak) {
+        return (taak.materialen || taak.benodigdheden) && (!taak.materialenStatus || taak.materialenStatus !== 'ok');
+      }
+      // Groeperen
+      let actieVereist = aankomend.filter(t => {
+        const d = new Date(t.datum);
+        return heeftActieNodig(t) && d <= new Date(Date.now() + 14*24*60*60*1000); // binnen 2 weken
+      });
+      let rest = aankomend.filter(t => !actieVereist.includes(t));
+      // Filter toepassen
+      let filter = window.ctqUpcomingFilter || '';
+      if (filter === 'actie') { rest = []; }
+      if (filter === 'week') {
+        const weekEind = new Date(); weekEind.setDate(weekEind.getDate() + 7);
+        actieVereist = actieVereist.filter(t => new Date(t.datum) <= weekEind);
+        rest = rest.filter(t => new Date(t.datum) <= weekEind);
+      }
+      // Alert badge
+      let alertHtml = '';
+      if (actieVereist.length > 0) {
+        alertHtml = `<span class='ctq-upcoming-badge-alert'>${actieVereist.length} taken hebben nog onderdelen nodig!</span>`;
+      }
+      // Cards actie vereist
+      let actieHtml = '';
+      if (actieVereist.length > 0) {
+        actieHtml = `<div class='ctq-upcoming-section-title'>Actie vereist ${alertHtml}</div><div class='ctq-card-list'>`;
+        for (let taak of actieVereist) {
+          actieHtml += `<div class='ctq-card'>
+            <div class='ctq-card-header'>
+              <span class='ctq-card-title'>${taak.omschrijving}</span>
+              <span class='ctq-badge status-niet'>${taak.status}</span>
+            </div>
+            <div class='ctq-card-row'><span class='ctq-card-label'>Datum:</span> ${taak.datum}</div>
+            <div class='ctq-card-row'><span class='ctq-card-label'>Benodigdheden:</span> ${(taak.materialen || taak.benodigdheden) || '-'} <span class='ctq-upcoming-badge-alert'>NOG NODIG</span></div>
+            <div class='ctq-card-actions'>
+              <button class='ctq-btn' onclick='window.chefMarkeerBesteld(${taak.id})'><i class="fas fa-truck"></i>Markeer als besteld</button>
+            </div>
+          </div>`;
+        }
+        actieHtml += `</div>`;
+      }
+      // Cards rest
+      let restHtml = '';
+      if (rest.length > 0) {
+        restHtml = `<div class='ctq-upcoming-section-title'>Aankomende taken</div><div class='ctq-card-list'>`;
+        for (let taak of rest) {
+          restHtml += `<div class='ctq-card'>
+            <div class='ctq-card-header'>
+              <span class='ctq-card-title'>${taak.omschrijving}</span>
+              <span class='ctq-badge status-${taak.status === 'Toegewezen' ? 'toegewezen' : 'niet'}'>${taak.status}</span>
+            </div>
+            <div class='ctq-card-row'><span class='ctq-card-label'>Datum:</span> ${taak.datum}</div>
+            <div class='ctq-card-row'><span class='ctq-card-label'>Benodigdheden:</span> ${(taak.materialen || taak.benodigdheden) || '-'} <span class='ctq-upcoming-badge-ok'>AANWEZIG</span></div>
+            <div class='ctq-card-actions'>
+              <button class='ctq-btn details' onclick='window.chefShowCtqDetail(${taak.id})'><i class="fas fa-eye"></i>Details</button>
+            </div>
+          </div>`;
+        }
+        restHtml += `</div>`;
+      }
+      // Renderen
+      container.innerHTML = filterHtml + actieHtml + restHtml;
+      // Filter event
+      document.getElementById('ctq-upcoming-filter').value = filter;
+      document.getElementById('ctq-upcoming-filter').onchange = function() {
+        window.ctqUpcomingFilter = this.value;
+        renderChefUpcomingCtqs();
+      };
+    }
+    window.chefMarkeerBesteld = function(id) {
+      const taak = ctqPlanning.find(t => t.id === id);
+      if (!taak) return;
+      taak.materialenStatus = 'ok';
+      renderChefUpcomingCtqs();
+      renderChefCtqPlanning();
+    };
+    // Tabs functionaliteit uitbreiden
+    const chefTabUpcoming = document.getElementById('chef-tab-upcoming');
+    const chefUpcomingTab = document.getElementById('chef-upcoming-tab');
+    chefTabUpcoming.onclick = function() {
+      chefTabUpcoming.classList.add('active');
+      chefTabCtq.classList.remove('active');
+      chefTabVerzoeken.classList.remove('active');
+      chefCtqTab.style.display = 'none';
+      chefVerzoekenTab.style.display = 'none';
+      chefUpcomingTab.style.display = '';
+      renderChefUpcomingCtqs();
+    };
+    // Zorg dat CTQ/Verzoeken tab ook werkt
+    chefTabCtq.onclick = function() {
+      chefTabCtq.classList.add('active');
+      chefTabVerzoeken.classList.remove('active');
+      chefTabUpcoming.classList.remove('active');
+      chefCtqTab.style.display = '';
+      chefVerzoekenTab.style.display = 'none';
+      chefUpcomingTab.style.display = 'none';
+      renderChefCtqPlanning();
+    };
+    chefTabVerzoeken.onclick = function() {
+      chefTabCtq.classList.remove('active');
+      chefTabVerzoeken.classList.add('active');
+      chefTabUpcoming.classList.remove('active');
+      chefCtqTab.style.display = 'none';
+      chefVerzoekenTab.style.display = '';
+      chefUpcomingTab.style.display = 'none';
+      renderChefVerzoeken();
+    };
+    const chefModalCompactStyle = document.createElement('style');
+    chefModalCompactStyle.innerHTML = `
+      #chef-modal {
+        max-width: 520px;
+        width: 95%;
+        min-width: 0;
+        padding: 28px 16px 22px 16px;
+        font-size: 1em;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        box-sizing: border-box;
+      }
+      #chef-modal-content {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-bottom: 0;
+      }
+      @media (max-width: 700px) {
+        #chef-modal {
+          padding: 12px 2vw 10px 2vw;
+          font-size: 0.97em;
+          max-height: 96vh;
+        }
+        #chef-modal-content {
+          max-height: 68vh;
+        }
+      }
+    `;
+    document.head.appendChild(chefModalCompactStyle);
+
+    // ... bestaande code ...
+    // Voeg modale HTML toe aan .ipad-container in plaats van body (voor chef-modal)
+    if (!document.getElementById('chef-modal-bg')) {
+      const chefModalHtml = `
+        <div id="chef-modal-bg" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#0008; z-index:1000; align-items:center; justify-content:center;">
+          <div id="chef-modal" style="background:#fff; border-radius:12px; max-width:520px; width:95%; margin:auto; padding:32px 20px 28px 20px; box-shadow:0 8px 32px #0003; position:relative;">
+            <button id="chef-modal-close" style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.3em; cursor:pointer; color:#888;">&times;</button>
+            <div id="chef-modal-content"></div>
+          </div>
+        </div>
+      `;
+      const ipadContainer = document.querySelector('.ipad-container');
+      if (ipadContainer) {
+        ipadContainer.insertAdjacentHTML('beforeend', chefModalHtml);
+      } else {
+        document.body.insertAdjacentHTML('beforeend', chefModalHtml);
+      }
+    }
+    // ... bestaande code ...
+
+    // ... bestaande code ...
+    // Zet alle datums van ctqPlanning op vandaag
+    (function() {
+      var vandaag = new Date();
+      var yyyy = vandaag.getFullYear();
+      var mm = String(vandaag.getMonth()+1).padStart(2,'0');
+      var dd = String(vandaag.getDate()).padStart(2,'0');
+      var vandaagStr = `${yyyy}-${mm}-${dd}`;
+      ctqPlanning.forEach(t => { t.datum = vandaagStr; });
+    })();
+    // ... bestaande code ...
+
+    // ... bestaande code ...
+    // Helper: parseer duur (zoals '30 minuten', '1 uur', '1 uur 30 minuten') naar minuten
+    function parseDuurNaarMinuten(duur) {
+      if (!duur) return 0;
+      let min = 0;
+      let match = duur.match(/(\d+)\s*u(?:ur)?/i);
+      if (match) min += parseInt(match[1],10)*60;
+      match = duur.match(/(\d+)\s*m(?:in)?/i);
+      if (match) min += parseInt(match[1],10);
+      // Ook "1 uur 30 minuten" etc
+      match = duur.match(/(\d+)\s*u(?:ur)?\s*(\d+)?\s*m(?:in)?/i);
+      if (match) min = parseInt(match[1],10)*60 + (match[2]?parseInt(match[2],10):0);
+      return min;
+    }
+    // ... bestaande code ...
+
+    // Helper: krijg maandag van de huidige week
+    function getMonday(d) {
+      d = new Date(d);
+      let day = d.getDay();
+      let diff = d.getDate() - day + (day === 0 ? -6 : 1); // maandag
+      return new Date(d.setDate(diff));
+    }
+
+    // Helper: formatteer datum als yyyy-mm-dd
+    function formatDate(d) {
+      return d.toISOString().slice(0,10);
+    }
+
+    // --- Outlook-achtige weekagenda voor monteur ---
+    function renderMonteurAgendaWeek() {
+      const monteur = document.getElementById('monteur-select').value;
+      const title = document.getElementById('monteur-todo-title');
+      const list = document.getElementById('monteur-todo-list');
+      const detail = document.getElementById('monteur-taak-detail');
+      detail.classList.add('hidden');
+      title.textContent = `Jouw planning (${monteur})`;
+      // Weekbereik bepalen
+      const vandaag = new Date();
+      const maandag = getMonday(vandaag);
+      let dagen = [];
+      for (let i=0; i<6; i++) {
+        let d = new Date(maandag);
+        d.setDate(maandag.getDate()+i);
+        dagen.push({
+          label: d.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+          date: formatDate(d)
+        });
+      }
+      // Tijdvakken
+      let uren = [];
+      for (let h=7; h<=19; h++) {
+        uren.push(h);
+      }
+      // Geplande taken per dag
+      let geplandeTaken = ctqPlanning.filter(t =>
+        t.status === 'Toegewezen' &&
+        t.toegewezenMonteur === monteur &&
+        typeof t.geplandTijdstip === 'string' &&
+        t.geplandTijdstip.trim() !== '' &&
+        dagen.some(d => t.geplandTijdstip.slice(0,10) === d.date)
+      );
+      // Flex taken per dag
+      let flexTaken = ctqPlanning.filter(t => {
+        if (t.status !== 'Toegewezen' || t.toegewezenMonteur !== monteur) return false;
+        if (typeof t.geplandTijdstip === 'string' && t.geplandTijdstip.trim() !== '') return false;
+        if (!t.datum) return false;
+        return dagen.some(d => t.datum === d.date);
+      });
+      // Agenda grid
+      let html = `<div class='monteur-agenda-week'>
+        <div class='agenda-header'>
+          <div class='agenda-tijd-col'></div>
+          ${dagen.map(d=>`<div class='agenda-dag-col'><div class='agenda-dag-label'>${d.label}</div></div>`).join('')}
+        </div>
+        <div class='agenda-body'>
+          <div class='agenda-tijd-col'>
+            ${uren.map(h=>`<div class='agenda-tijdvak'>${String(h).padStart(2,'0')}:00</div>`).join('')}
+          </div>
+          ${dagen.map((d,di)=>`
+            <div class='agenda-dag-col agenda-dag-body' data-date='${d.date}'>
+              ${uren.map((h,hi)=>`<div class='agenda-cel' data-uur='${h}'></div>`).join('')}
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      // Flex taken onderaan
+      html += `<div class='agenda-flex-taken'><h4>Flexibele taken deze week</h4>`;
+      if (flexTaken.length === 0) {
+        html += `<div style='color:#888;'>Geen flexibele taken deze week.</div>`;
+      } else {
+        html += `<div class='flex-taken-kaarten'>` +
+          flexTaken.map(taak => {
+            let dag = dagen.find(d=>d.date===taak.datum);
+            return `<div class='flex-taak-kaart'>
+              <div class='flex-taak-oms'>${taak.omschrijving}</div>
+              <div class='flex-taak-deadline'><i class=\"fas fa-calendar-alt\"></i> Uitvoeren op: <b>${dag?dag.label:taak.datum}</b></div>
+              <button onclick=\"window.inplanFlexTaak(${taak.id})\" class='flex-taak-btn'>Inplannen</button>
+              <button onclick=\"toonCtqTaakDetail(${taak.id})\" class='flex-taak-btn' style='background:#eee; color:#2980b9; margin-left:8px;'>Details</button>
+            </div>`;
+          }).join('') + `</div>`;
+      }
+      html += `</div>`;
+      // Maak agenda-cellen droppable
+      setTimeout(()=>{
+        document.querySelectorAll('.agenda-cel').forEach(cel => {
+          cel.ondragover = e => { e.preventDefault(); cel.style.background='#eafaf3'; };
+          cel.ondragleave = e => { cel.style.background=''; };
+          cel.ondrop = e => {
+            cel.style.background='';
+            let taakId = window.flexTaakDragId;
+            if (!taakId) return;
+            let taak = ctqPlanning.find(t=>t.id==taakId);
+            if (!taak) return;
+            let dag = cel.parentElement.getAttribute('data-date');
+            let uur = cel.getAttribute('data-uur');
+            // Gebruik bestaande duur van de taak
+            if (!taak.duur) return; // geen duur bekend, niet plannen
+            taak.geplandTijdstip = dag+`T${String(uur).padStart(2,'0')}:00`;
+            taak.status = 'Toegewezen';
+            taak.toegewezenMonteur = document.getElementById('monteur-select').value;
+            taak.geplandGroen = true;
+            renderMonteurTodo();
+          };
+        });
+      }, 0);
+      window.flexTaakDragStart = function(e, id) {
+        window.flexTaakDragId = id;
+      };
+      list.innerHTML = html;
+      // Plaats taakblokken in de agenda
+      geplandeTaken.forEach(taak => {
+        let dagIdx = dagen.findIndex(d=>taak.geplandTijdstip.slice(0,10)===d.date);
+        if (dagIdx===-1) return;
+        let tijd = taak.geplandTijdstip.slice(11,16);
+        let [h,m] = tijd.split(':').map(Number);
+        let duurMin = parseDuurNaarMinuten(taak.duur);
+        let pxPerUur = 120;
+        let top = ((h-7)+(m/60))*pxPerUur; // geen +2px offset
+        let height = Math.max(duurMin/60*pxPerUur, 16); // hoogte exact volgens duur, min 16px
+        let dagCol = document.querySelectorAll('.agenda-dag-body')[dagIdx];
+        if (!dagCol) return;
+        let taakDiv = document.createElement('div');
+        taakDiv.className = 'agenda-taak-blok';
+        taakDiv.style.top = top+'px';
+        taakDiv.style.height = height+'px';
+        taakDiv.innerHTML = `<div class='agenda-taak-tijd'>${tijd} - ${h+Math.floor((m+duurMin)/60)}:${String((m+duurMin)%60).padStart(2,'0')}</div>`;
+        taakDiv.onclick = ()=>window.toonCtqTaakDetail(taak.id);
+        dagCol.appendChild(taakDiv);
+      });
+    }
+
+    // --- CSS voor agenda ---
+    const agendaCss = `
+    .monteur-agenda-week { width:100%; overflow-x:auto; }
+    .agenda-header, .agenda-body { display:flex; }
+    .agenda-tijd-col { width:80px; flex-shrink:0; }
+    .agenda-dag-col { flex:1 1 0; min-width:120px; border-left:1px solid #e0e6ef; position:relative; }
+    .agenda-header { background:#f7f8fa; border-bottom:1px solid #e0e6ef; }
+    .agenda-dag-label { text-align:center; font-weight:600; padding:8px 0 6px 0; color:#2980b9; font-size:1.08em; }
+    .agenda-body { min-height:1560px; }
+    .agenda-tijdvak { height:120px; text-align:right; padding:0 12px; color:#888; font-size:1.08em; border-bottom:1px solid #f2f4fa; display:flex; align-items:center; }
+    .agenda-dag-body { position:relative; }
+    .agenda-cel { height:120px; border-bottom:1px solid #f2f4fa; }
+    .agenda-taak-blok { 
+      position:absolute; left:4px; right:4px; background:#eaf3fb; border-left:4px solid #2980b9; 
+      box-shadow:0 2px 8px #2980b91a; padding:7px 12px 5px 12px; font-size:0.98em; color:#222; cursor:pointer; z-index:2; overflow:hidden; transition:box-shadow 0.2s; display:flex; flex-direction:column; justify-content:center; 
+      box-sizing: border-box; border-radius: 0;
+    }
+    .agenda-taak-blok:hover { box-shadow:0 4px 16px #2980b92a; background:#d6e8fa; }
+    .agenda-taak-tijd { font-weight:600; color:#2980b9; font-size:0.97em; margin-bottom:2px; }
+    .agenda-taak-oms { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.97em; }
+    .agenda-flex-taken { margin-top:32px; }
+    @media (max-width:1100px) { .monteur-agenda-week { font-size:0.97em; } .agenda-dag-col { min-width:90px; } .agenda-tijd-col { width:60px; } }
+    @media (max-width:700px) { .monteur-agenda-week { font-size:0.93em; } .agenda-dag-col { min-width:70px; } .agenda-tijd-col { width:38px; } }
+    `;
+    if (!document.getElementById('agenda-css')) {
+      const style = document.createElement('style');
+      style.id = 'agenda-css';
+      style.innerHTML = agendaCss;
+      document.head.appendChild(style);
+    }
+
+    // --- Vervang renderMonteurTodo door weekagenda ---
+    window.renderMonteurTodo = renderMonteurAgendaWeek;
+
+    // ... bestaande code ...
+    // --- Outlook-achtige week/dag agenda voor monteur ---
+    let monteurAgendaView = 'week'; // 'week' of 'dag'
+    let monteurAgendaDagIdx = 0; // 0=maandag
+
+    function renderMonteurAgendaSwitcher(dagen) {
+      return `<div class='agenda-switcher'>
+        <button type='button' class='agenda-switch-btn${monteurAgendaView==='week'?' active':''}' onclick='window.setMonteurAgendaView("week")'>Week</button>
+        <button type='button' class='agenda-switch-btn${monteurAgendaView==='dag'?' active':''}' onclick='window.setMonteurAgendaView("dag")'>Dag</button>
+        ${monteurAgendaView==='dag' ? `<select id='agenda-dag-select' style='margin-left:16px; padding:4px 8px; border-radius:6px; border:1px solid #ccc;'>${dagen.map((d,i)=>`<option value='${i}'${i===monteurAgendaDagIdx?' selected':''}>${d.label}</option>`).join('')}</select>` : ''}
+      </div>`;
+    }
+    window.setMonteurAgendaView = function(view) {
+      monteurAgendaView = view;
+      renderMonteurAgendaWeek();
+    };
+
+    // --- Outlook-achtige week/dag agenda voor monteur ---
+    function renderMonteurAgendaWeek() {
+      const monteur = document.getElementById('monteur-select').value;
+      const title = document.getElementById('monteur-todo-title');
+      const list = document.getElementById('monteur-todo-list');
+      const detail = document.getElementById('monteur-taak-detail');
+      detail.classList.add('hidden');
+      title.textContent = `Jouw planning (${monteur})`;
+      // Weekbereik bepalen
+      const vandaag = new Date();
+      const maandag = getMonday(vandaag);
+      let dagen = [];
+      for (let i=0; i<6; i++) {
+        let d = new Date(maandag);
+        d.setDate(maandag.getDate()+i);
+        dagen.push({
+          label: d.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+          date: formatDate(d)
+        });
+      }
+      // Tijdvakken
+      let uren = [];
+      for (let h=7; h<=19; h++) {
+        uren.push(h);
+      }
+      // Geplande taken per dag
+      let geplandeTaken = ctqPlanning.filter(t =>
+        t.status === 'Toegewezen' &&
+        t.toegewezenMonteur === monteur &&
+        typeof t.geplandTijdstip === 'string' &&
+        t.geplandTijdstip.trim() !== '' &&
+        dagen.some(d => t.geplandTijdstip.slice(0,10) === d.date)
+      );
+      // Flex taken per dag
+      let flexTaken = ctqPlanning.filter(t => {
+        if (t.status !== 'Toegewezen' || t.toegewezenMonteur !== monteur) return false;
+        if (typeof t.geplandTijdstip === 'string' && t.geplandTijdstip.trim() !== '') return false;
+        if (!t.datum) return false;
+        return dagen.some(d => t.datum === d.date);
+      });
+      // --- SWITCHER ---
+      let html = renderMonteurAgendaSwitcher(dagen);
+      // --- WEEK OF DAG ---
+      if (monteurAgendaView==='week') {
+        html += `<div class='monteur-agenda-week'>
+          <div class='agenda-header'>
+            <div class='agenda-tijd-col'></div>
+            ${dagen.map(d=>`<div class='agenda-dag-col'><div class='agenda-dag-label'>${d.label}</div></div>`).join('')}
+          </div>
+          <div class='agenda-body'>
+            <div class='agenda-tijd-col'>
+              ${uren.map(h=>`<div class='agenda-tijdvak'>${String(h).padStart(2,'0')}:00</div>`).join('')}
+            </div>
+            ${dagen.map((d,di)=>`
+              <div class='agenda-dag-col agenda-dag-body' data-date='${d.date}'>
+                ${uren.map((h,hi)=>`<div class='agenda-cel' data-uur='${h}'></div>`).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+      } else {
+        // DAGOVERZICHT
+        let d = dagen[monteurAgendaDagIdx];
+        html += `<div class='monteur-agenda-week'>
+          <div class='agenda-header'>
+            <div class='agenda-tijd-col'></div>
+            <div class='agenda-dag-col'><div class='agenda-dag-label'>${d.label}</div></div>
+          </div>
+          <div class='agenda-body'>
+            <div class='agenda-tijd-col'>
+              ${uren.map(h=>`<div class='agenda-tijdvak'>${String(h).padStart(2,'0')}:00</div>`).join('')}
+            </div>
+            <div class='agenda-dag-col agenda-dag-body' data-date='${d.date}'>
+              ${uren.map((h,hi)=>`<div class='agenda-cel' data-uur='${h}'></div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      }
+      // Flex taken onderaan
+      html += `<div class='agenda-flex-taken'><h4>Flexibele taken deze week</h4>`;
+      if (flexTaken.length === 0) {
+        html += `<div style='color:#888;'>Geen flexibele taken deze week.</div>`;
+      } else {
+        html += `<div class='flex-taken-kaarten'>` +
+          flexTaken.map(taak => {
+            let dag = dagen.find(d=>d.date===taak.datum);
+            return `<div class='flex-taak-kaart'>
+              <div class='flex-taak-oms'>${taak.omschrijving}</div>
+              <div class='flex-taak-deadline'><i class=\"fas fa-calendar-alt\"></i> Uitvoeren op: <b>${dag?dag.label:taak.datum}</b></div>
+              <button onclick=\"window.inplanFlexTaak(${taak.id})\" class='flex-taak-btn'>Inplannen</button>
+              <button onclick=\"toonCtqTaakDetail(${taak.id})\" class='flex-taak-btn' style='background:#eee; color:#2980b9; margin-left:8px;'>Details</button>
+            </div>`;
+          }).join('') + `</div>`;
+      }
+      html += `</div>`;
+      // Maak agenda-cellen droppable
+      setTimeout(()=>{
+        document.querySelectorAll('.agenda-cel').forEach(cel => {
+          cel.ondragover = e => { e.preventDefault(); cel.style.background='#eafaf3'; };
+          cel.ondragleave = e => { cel.style.background=''; };
+          cel.ondrop = e => {
+            cel.style.background='';
+            let taakId = window.flexTaakDragId;
+            if (!taakId) return;
+            let taak = ctqPlanning.find(t=>t.id==taakId);
+            if (!taak) return;
+            let dag = cel.parentElement.getAttribute('data-date');
+            let uur = cel.getAttribute('data-uur');
+            // Gebruik bestaande duur van de taak
+            if (!taak.duur) return; // geen duur bekend, niet plannen
+            taak.geplandTijdstip = dag+`T${String(uur).padStart(2,'0')}:00`;
+            taak.status = 'Toegewezen';
+            taak.toegewezenMonteur = document.getElementById('monteur-select').value;
+            taak.geplandGroen = true;
+            renderMonteurTodo();
+          };
+        });
+      }, 0);
+      window.flexTaakDragStart = function(e, id) {
+        window.flexTaakDragId = id;
+      };
+      list.innerHTML = html;
+      // Plaats taakblokken in de agenda
+      if (monteurAgendaView==='week') {
+        dagen.forEach((d, dagIdx) => {
+          // Verzamel en sorteer taken voor deze dag op starttijd
+          let takenOpDag = geplandeTaken.filter(t => t.geplandTijdstip.slice(0,10) === d.date)
+            .map(taak => {
+              let tijd = taak.geplandTijdstip.slice(11,16);
+              let [h,m] = tijd.split(':').map(Number);
+              let duurMin = parseDuurNaarMinuten(taak.duur);
+              return { taak, h, m, duurMin, tijd };
+            })
+            .sort((a,b) => (a.h*60+a.m)-(b.h*60+b.m));
+          let prevEnd = null;
+          let marge = 4; // 4px witruimte tussen blokken
+          let cumulatieveMarge = 0;
+          takenOpDag.forEach((item, i) => {
+            let { taak, h, m, duurMin, tijd } = item;
+            let pxPerUur = 120;
+            let top = ((h-7)+(m/60))*pxPerUur + cumulatieveMarge;
+            // Voeg marge toe vóór elk blok behalve het eerste
+            if (i > 0) {
+              cumulatieveMarge += marge;
+              top += marge;
+            }
+            // Trek marge af van de hoogte zodat alles samen exact past
+            let height = Math.max(duurMin/60*pxPerUur - (i > 0 ? marge : 0), 16);
+            let dagCol = document.querySelectorAll('.agenda-dag-body')[dagIdx];
+            if (!dagCol) return;
+            let taakDiv = document.createElement('div');
+            taakDiv.className = 'agenda-taak-blok';
+            taakDiv.style.top = top+'px';
+            taakDiv.style.height = height+'px';
+            taakDiv.innerHTML = `<div class='agenda-taak-tijd'>${tijd} - ${h+Math.floor((m+duurMin)/60)}:${String((m+duurMin)%60).padStart(2,'0')}</div>`;
+            taakDiv.onclick = ()=>window.toonCtqTaakDetail(taak.id);
+            dagCol.appendChild(taakDiv);
+          });
+        });
+      } else {
+        // Alleen geplande taken van geselecteerde dag
+        let d = dagen[monteurAgendaDagIdx];
+        let takenOpDag = geplandeTaken.filter(taak=>taak.geplandTijdstip.slice(0,10)===d.date)
+          .map(taak => {
+            let tijd = taak.geplandTijdstip.slice(11,16);
+            let [h,m] = tijd.split(':').map(Number);
+            let duurMin = parseDuurNaarMinuten(taak.duur);
+            return { taak, h, m, duurMin, tijd };
+          })
+          .sort((a,b) => (a.h*60+a.m)-(b.h*60+b.m));
+        let prevEnd = null;
+        takenOpDag.forEach((item, i) => {
+          let { taak, h, m, duurMin, tijd } = item;
+          let pxPerUur = 120;
+          let top = ((h-7)+(m/60))*pxPerUur; // geen +2px offset
+          let height = Math.max(duurMin/60*pxPerUur, 16); // hoogte exact volgens duur, min 16px
+          if (prevEnd !== null && (h*60+m) === prevEnd) {
+            top += 4;
+          }
+          prevEnd = h*60+m+duurMin;
+          let dagCol = document.querySelectorAll('.agenda-dag-body')[0];
+          if (!dagCol) return;
+          let taakDiv = document.createElement('div');
+          taakDiv.className = 'agenda-taak-blok';
+          taakDiv.style.top = top+'px';
+          taakDiv.style.height = height+'px';
+          taakDiv.innerHTML = `<div class='agenda-taak-tijd'>${tijd} - ${h+Math.floor((m+duurMin)/60)}:${String((m+duurMin)%60).padStart(2,'0')}</div>`;
+          taakDiv.onclick = ()=>window.toonCtqTaakDetail(taak.id);
+          dagCol.appendChild(taakDiv);
+        });
+      }
+      // Event dag-select
+      if (monteurAgendaView==='dag') {
+        const dagSelect = document.getElementById('agenda-dag-select');
+        if (dagSelect) {
+          dagSelect.onchange = function() {
+            monteurAgendaDagIdx = parseInt(this.value,10);
+            renderMonteurAgendaWeek();
+          };
+        }
+      }
+    }
+
+    // --- CSS extra voor switcher ---
+    const agendaCssExtra = `
+    .agenda-switcher { margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .agenda-switch-btn { background:#f7f8fa; color:#2980b9; border:1px solid #c6d6e6; border-radius:8px; padding:5px 18px; font-size:1em; font-weight:600; margin-right:2px; cursor:pointer; transition:background 0.2s, color 0.2s; }
+    .agenda-switch-btn.active, .agenda-switch-btn:active { background:#2980b9; color:#fff; }
+    #agenda-dag-select { font-size:1em; }
+    `;
+    if (!document.getElementById('agenda-css-extra')) {
+      const style = document.createElement('style');
+      style.id = 'agenda-css-extra';
+      style.innerHTML = agendaCssExtra;
+      document.head.appendChild(style);
+    }
+    // CSS voor flexibele taken kaartjes
+    const flexKaartCss = `
+    .flex-taken-kaarten { display:block; margin-top:10px; }
+    .flex-taak-kaart { background:#f7f8fa; border-radius:14px; box-shadow:0 2px 8px #2980b91a; padding:18px 18px 14px 18px; width:100%; max-width:none; margin-bottom:16px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; border-left:4px solid #27ae60; }
+    .flex-taak-oms { font-weight:600; font-size:1.08em; color:#222; margin-bottom:2px; }
+    .flex-taak-deadline { color:#2980b9; font-size:0.98em; margin-bottom:4px; }
+    .flex-taak-btn { background:#27ae60; color:#fff; border:none; border-radius:8px; padding:6px 18px; font-size:1em; font-weight:600; cursor:pointer; margin-top:4px; }
+    .flex-taak-btn:hover { background:#219150; }
+    @media (max-width:900px) { .flex-taken-kaarten { } .flex-taak-kaart { min-width:0; max-width:100%; } }
+    `;
+    if (!document.getElementById('flex-kaart-css')) {
+      const style = document.createElement('style');
+      style.id = 'flex-kaart-css';
+      style.innerHTML = flexKaartCss;
+      document.head.appendChild(style);
+    }
+// ... bestaande code ...
+  </script>
+</body>
+</html>
